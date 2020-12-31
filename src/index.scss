@@ -1,0 +1,17 @@
+@font-face {
+  font-family: 'Share Tech Mono';
+  src: url('./app/assets/fonts/share-tech-mono.ttf') format('ttf');
+}
+
+body {
+  margin: 0;
+  font-family: 'Share Tech Mono';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body,
+#root {
+  display: flex;
+  flex: 1;
+}

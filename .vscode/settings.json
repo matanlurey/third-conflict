@@ -1,0 +1,68 @@
+{
+  // Formatting.
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true,
+    "source.fixAll.eslint": true,
+    "source.fixAll.tslint": true,
+    "source.organizeImports": true
+  },
+  "editor.formatOnSave": true,
+  "prettier.ignorePath": ".gitignore",
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+
+  // Schema Validation.
+  "json.schemas": [
+    {
+      "fileMatch": ["samples/saves/*.json"],
+      "url": "./node_modules/@matanlurey/tts-save-format/src/schema/SaveState.json"
+    },
+
+    {
+      "fileMatch": [
+        "samples/sources/Checkers.json",
+        "samples/sources/Tools.json"
+      ],
+      "url": "./src/schema/ExpandedSaveState.json"
+    },
+
+    {
+      "fileMatch": ["samples/sources/*/**/*.json"],
+      "url": "./src/schema/ExpandedObjectState.json"
+    }
+  ],
+
+  // Linting.
+  "eslint.options": {
+    // https://github.com/microsoft/vscode/issues/87791#issuecomment-569433183
+    "parserOptions": {
+      "project": ["${workspaceFolder}/tsconfig.json"]
+    }
+  },
+  "eslint.validate": ["javascript", "json", "typescript"],
+  "eslint.lintTask.enable": true,
+  "editor.tabSize": 2,
+  "cSpell.ignorePaths": [
+    "**/package-lock.json",
+    "**/node_modules/**",
+    "**/vscode-extension/**",
+    "**/.git/objects/**",
+    "package.json",
+    ".vscode",
+    ".vscode-insiders"
+  ],
+  "cSpell.words": [
+    "Sider",
+    "antd"
+  ]
+}
