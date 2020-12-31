@@ -8,7 +8,7 @@ TBD.
 
 ### Framework
 
-- [ ] Basic UI Scaffold with Tests.
-- [ ] Login with Discord.
+- [x] Basic UI Scaffold.
 - [ ] Create/Start/End Local Game.
+- [ ] Login with Discord.
 - [ ] Create/Start/End Remote Game.

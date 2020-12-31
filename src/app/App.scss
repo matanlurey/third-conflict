@@ -1,12 +1,32 @@
 @import '~antd/dist/antd.dark.css';
 
-.ant-layout {
-  display: flex;
-  flex: 1;
+.logo {
+  float: left;
+
+  img {
+    height: 40px;
+    padding: 0px 4px;
+    margin-top: -8px;
+  }
+}
+
+.ant-layout-header {
+  padding: 0px 10px;
+
+  .ant-menu {
+    font-family: 'Futile Pro';
+    text-transform: uppercase;
+    font-size: x-small;
+    letter-spacing: 1px;
+    float: right;
+
+    .ant-menu-item-active,
+    .ant-menu-item-active:hover {
+      background-color: darken(#e99766, 40);
+    }
+  }
 }
 
 .ant-layout-content {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  margin: 12px 12px 0;
 }
