@@ -3,14 +3,9 @@
   src: url('./app/assets/fonts/futile-pro.woff') format('woff');
 }
 
-@font-face {
-  font-family: 'Share Tech Mono';
-  src: url('./app/assets/fonts/share-tech-mono.ttf') format('ttf');
-}
-
 body {
   margin: 0;
-  font-family: 'Share Tech Mono';
+  font-family: 'Oswald', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

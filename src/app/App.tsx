@@ -5,14 +5,22 @@ import {
 } from '@ant-design/icons';
 import { Button, Layout, Menu } from 'antd';
 import React, { useState } from 'react';
+import { useCookies } from 'react-cookie';
 import { hot } from 'react-hot-loader';
 import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
 import './App.scss';
 import { GlobalAuthContext, GlobalAuthState } from './contexts/auth';
 import { AccountRoute } from './routes/Account';
+import { GamesRoute } from './routes/Games';
 
 function app(): JSX.Element {
-  const [authState, setAuthState] = useState<GlobalAuthState>(null);
+  const [cookies, setCookies] = useCookies(['auth']);
+  const [authState, setAuthState] = useState<GlobalAuthState>(cookies['auth']);
+
+  const updateAuth = (state: GlobalAuthState) => {
+    setCookies('auth', state);
+    setAuthState(state);
+  };
 
   return (
     <Router>
@@ -24,13 +32,13 @@ function app(): JSX.Element {
             </Link>
           </div>
           <Menu theme="dark" mode="horizontal" selectable={false}>
-            <Menu.Item icon={<DatabaseOutlined />}>
+            <Menu.Item disabled={!authState} icon={<DatabaseOutlined />}>
               <Link to="/games">Games</Link>
             </Menu.Item>
             <Menu.Item icon={<UserOutlined />}>
               <Link to="/account">Account</Link>
             </Menu.Item>
-            <Menu.Item icon={<SettingOutlined />}>
+            <Menu.Item disabled icon={<SettingOutlined />}>
               <Link to="/settings">Settings</Link>
             </Menu.Item>
           </Menu>
@@ -38,9 +46,11 @@ function app(): JSX.Element {
         <GlobalAuthContext.Provider value={authState}>
           <Layout.Content>
             <Switch>
-              <Route path="/games">Hello Games</Route>
+              <Route path="/games">
+                <GamesRoute />
+              </Route>
               <Route path="/account">
-                <AccountRoute onChange={setAuthState} />
+                <AccountRoute onChange={updateAuth} />
               </Route>
               <Route path="/settings">Hello Settings</Route>
               <Route path="/">
@@ -48,7 +58,7 @@ function app(): JSX.Element {
                   <>
                     <Button type="dashed">
                       <Link to="/account">
-                        <UserOutlined /> Not logged in
+                        <UserOutlined /> Login Required
                       </Link>
                     </Button>
                   </>

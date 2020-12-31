@@ -24,6 +24,11 @@
     .ant-menu-item-active:hover {
       background-color: darken(#e99766, 40);
     }
+
+    .ant-menu-item-disabled,
+    .ant-menu-item-disabled:hover {
+      background-color: inherit;
+    }
   }
 }
 
