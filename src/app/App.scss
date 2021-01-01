@@ -4,21 +4,24 @@
   float: left;
 
   img {
-    height: 40px;
+    height: 30px;
     padding: 0px 4px;
     margin-top: -8px;
   }
 }
 
 .ant-layout-header {
-  padding: 0px 10px;
+  padding: 0px 5px;
 
   .ant-menu {
     font-family: 'Futile Pro';
     text-transform: uppercase;
     font-size: x-small;
-    letter-spacing: 1px;
     float: right;
+
+    .ant-menu-item {
+      padding: 0px 10px;
+    }
 
     .ant-menu-item-active,
     .ant-menu-item-active:hover {
