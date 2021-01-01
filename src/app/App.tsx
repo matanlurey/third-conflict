@@ -15,6 +15,10 @@ import { Default } from './routes/Default';
 import { GamesRoute } from './routes/Games';
 
 function app(): JSX.Element {
+  const [baseName] = useState(() => {
+    const result = document.head.baseURI;
+    return result.indexOf('localhost') ? undefined : result;
+  });
   const [cookies, setCookies] = useCookies(['auth']);
   const [authState, setAuthState] = useState<GlobalAuthState>(cookies['auth']);
 
@@ -24,7 +28,7 @@ function app(): JSX.Element {
   };
 
   return (
-    <Router>
+    <Router basename={baseName}>
       <Layout>
         <Layout.Header>
           <div className="logo">
