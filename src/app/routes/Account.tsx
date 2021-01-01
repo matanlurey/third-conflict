@@ -17,6 +17,9 @@ export function AccountRoute(props: AccountRateProps): JSX.Element {
       wrapperCol={{ span: 16 }}
     >
       <p>
+        <h1>Account</h1>
+      </p>
+      <p>
         A login is required to play <strong>Third Conflict</strong>. Currently
         you can login as a <strong>Guest</strong> and create and play games
         locally. In <em>future</em> releases you will be able to login with{' '}
