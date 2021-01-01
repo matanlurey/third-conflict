@@ -11,6 +11,7 @@ import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
 import './App.scss';
 import { GlobalAuthContext, GlobalAuthState } from './contexts/auth';
 import { AccountRoute } from './routes/Account';
+import { Default } from './routes/Default';
 import { GamesRoute } from './routes/Games';
 
 function app(): JSX.Element {
@@ -54,7 +55,7 @@ function app(): JSX.Element {
               </Route>
               <Route path="/settings">Hello Settings</Route>
               <Route path="/">
-                {!authState && (
+                {!authState ? (
                   <>
                     <Button type="dashed">
                       <Link to="/account">
@@ -62,6 +63,8 @@ function app(): JSX.Element {
                       </Link>
                     </Button>
                   </>
+                ) : (
+                  <Default />
                 )}
               </Route>
             </Switch>
