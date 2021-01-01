@@ -1,6 +1,6 @@
 {
   "files": {
-    "main.css": "/third-conflict/static/css/main.3c245a63.chunk.css",
+    "main.css": "/third-conflict/static/css/main.64936e74.chunk.css",
     "main.js": "/third-conflict/static/js/main.6528fb8c.chunk.js",
     "main.js.map": "/third-conflict/static/js/main.6528fb8c.chunk.js.map",
     "runtime-main.js": "/third-conflict/static/js/runtime-main.d6985348.js",
@@ -10,7 +10,7 @@
     "static/js/2.16e06442.chunk.js.map": "/third-conflict/static/js/2.16e06442.chunk.js.map",
     "index.html": "/third-conflict/index.html",
     "static/css/2.f0b9eaa0.chunk.css.map": "/third-conflict/static/css/2.f0b9eaa0.chunk.css.map",
-    "static/css/main.3c245a63.chunk.css.map": "/third-conflict/static/css/main.3c245a63.chunk.css.map",
+    "static/css/main.64936e74.chunk.css.map": "/third-conflict/static/css/main.64936e74.chunk.css.map",
     "static/js/2.16e06442.chunk.js.LICENSE.txt": "/third-conflict/static/js/2.16e06442.chunk.js.LICENSE.txt",
     "static/media/index.scss": "/third-conflict/static/media/futile-pro.21fa637b.woff"
   },
@@ -18,7 +18,7 @@
     "static/js/runtime-main.d6985348.js",
     "static/css/2.f0b9eaa0.chunk.css",
     "static/js/2.16e06442.chunk.js",
-    "static/css/main.3c245a63.chunk.css",
+    "static/css/main.64936e74.chunk.css",
     "static/js/main.6528fb8c.chunk.js"
   ]
 }
