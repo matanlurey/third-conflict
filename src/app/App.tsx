@@ -17,7 +17,7 @@ import { GamesRoute } from './routes/Games';
 function app(): JSX.Element {
   const [baseName] = useState(() => {
     const result = document.head.baseURI;
-    return result.indexOf('localhost') ? undefined : result;
+    return result.indexOf('localhost') === -1 ? undefined : result;
   });
   const [cookies, setCookies] = useCookies(['auth']);
   const [authState, setAuthState] = useState<GlobalAuthState>(cookies['auth']);
