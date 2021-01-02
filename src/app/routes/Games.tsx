@@ -1,5 +1,6 @@
 import { LaptopOutlined, PlusOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Form, Input, InputNumber, List, Radio, Table } from 'antd';
+import Prando from 'prando';
 import React, { useContext, useEffect } from 'react';
 import { Link, Route, Switch, useHistory, useParams } from 'react-router-dom';
 import { GameLobbyData } from '../../common/game-lobby';
@@ -33,7 +34,7 @@ function CreateGame(): JSX.Element {
         wrapperCol={{ span: 4 }}
         form={form}
         onFinish={(values) => {
-          storage.add(values);
+          storage.set({ ...values, kind: 'Lobby' });
           replace(`/games/${values.name}`);
         }}
       >
@@ -42,7 +43,7 @@ function CreateGame(): JSX.Element {
           label="Name"
           extra={<>This name is just used for reference only.</>}
         >
-          <Input />
+          <Input maxLength={30} />
         </Form.Item>
         <Form.Item
           name="players"
@@ -73,12 +74,95 @@ function CreateGame(): JSX.Element {
   );
 }
 
+interface GameSetup {
+  name: string;
+  seed: string;
+  systems: number;
+}
+
+function ViewLobby(props: GameLobbyData): JSX.Element {
+  const storage = useContext(LocalStorageContext);
+  const { replace } = useHistory();
+  const aiPlayers = new Array(props.players - 1).fill('');
+  const [form] = Form.useForm<GameSetup>();
+  useEffect(() => {
+    form.setFieldsValue({
+      name: props.name,
+      seed: new Prando().nextString(10),
+      systems: Math.ceil(props.players * 2.5),
+    });
+  }, []);
+  return (
+    <>
+      <h3>Players</h3>
+      <List>
+        <List.Item>
+          <List.Item.Meta
+            avatar={<UserOutlined />}
+            title={'Human'}
+            description={'Ready'}
+          />
+        </List.Item>
+        {aiPlayers.map((_, i) => {
+          return (
+            <List.Item key={i}>
+              <List.Item.Meta
+                avatar={<LaptopOutlined />}
+                title={`AI: ${i + 1}`}
+                description={'Ready'}
+              />
+            </List.Item>
+          );
+        })}
+      </List>
+      <h3>Settings</h3>
+      <Form labelCol={{ span: 1 }} wrapperCol={{ span: 4 }} form={form}>
+        <Form.Item
+          label="Name"
+          name="name"
+          extra={<>Used for identifying the game only.</>}
+        >
+          <Input readOnly minLength={10} maxLength={20} />
+        </Form.Item>
+        <Form.Item
+          label="Seed"
+          name="seed"
+          extra={<>Used for procedural generation of systems.</>}
+        >
+          <Input readOnly minLength={10} maxLength={20} />
+        </Form.Item>
+        <Form.Item
+          label="Systems"
+          name="systems"
+          extra={<>A recommended number is 2-3 systems per player.</>}
+        >
+          <InputNumber min={props.players} max={26} />
+        </Form.Item>
+        <p className="games-buttons">
+          <Button type="primary" disabled htmlType="submit">
+            Start
+          </Button>
+          <Button
+            danger
+            onClick={() => {
+              storage.remove(props.name);
+              replace('/games');
+            }}
+          >
+            Delete
+          </Button>
+        </p>
+      </Form>
+    </>
+  );
+}
+
 function ViewGameOrLobby(): JSX.Element {
   const params = useParams<{ readonly name: string }>();
   const storage = useContext(LocalStorageContext);
-  const localLobby = storage.get(params.name);
-  const { goBack, replace } = useHistory();
-  if (!localLobby) {
+  const localGame = storage.get(params.name);
+  const { goBack } = useHistory();
+  if (!localGame) {
     return (
       <>
         <h1>
@@ -88,47 +172,12 @@ function ViewGameOrLobby(): JSX.Element {
         <Button onClick={goBack}>Go Back</Button>
       </>
     );
+  } else if (localGame.kind === 'Lobby') {
+    return <ViewLobby {...localGame} />;
   } else {
-    const aiPlayers = new Array(localLobby.players - 1).fill('');
     return (
       <>
-        <h1>
-          Lobby for <code>{params.name}</code>
-        </h1>
-        <List>
-          <List.Item>
-            <List.Item.Meta
-              avatar={<UserOutlined />}
-              title={'Human'}
-              description={'Ready'}
-            />
-          </List.Item>
-          {aiPlayers.map((_, i) => {
-            return (
-              <List.Item key={i}>
-                <List.Item.Meta
-                  avatar={<LaptopOutlined />}
-                  title={`AI: ${i + 1}`}
-                  description={'Ready'}
-                />
-              </List.Item>
-            );
-          })}
-        </List>
-        <p className="games-buttons">
-          <Button type="primary" disabled>
-            Start
-          </Button>
-          <Button
-            danger
-            onClick={() => {
-              storage.remove(localLobby.name);
-              replace('/games');
-            }}
-          >
-            Delete
-          </Button>
-        </p>
+        Game for <code>{params.name}</code>
       </>
     );
   }
@@ -138,6 +187,16 @@ function ListGames(): JSX.Element {
   const context = useContext(GlobalAuthContext);
   const storage = useContext(LocalStorageContext);
   const { push } = useHistory();
+  const dataSource = storage.games
+    .sort((a, b) => a.lastUpdate - b.lastUpdate)
+    .map((v) => {
+      return {
+        name: <Link to={`/games/${v.name}`}>{v.name}</Link>,
+        key: v.name,
+        players: v.players,
+        status: v.kind === 'Lobby' && !v.online ? 'Lobby (Host)' : 'Unknown',
+      };
+    });
   return (
     <>
       <h1>Games</h1>
@@ -170,14 +229,7 @@ function ListGames(): JSX.Element {
           { title: 'Players', dataIndex: 'players' },
           { title: 'Status', dataIndex: 'status' },
         ]}
-        dataSource={storage.lobbies.map((v) => {
-          return {
-            name: <Link to={`/games/${v.name}`}>{v.name}</Link>,
-            key: v.name,
-            players: v.players,
-            status: 'Lobby (Host)',
-          };
-        })}
+        dataSource={dataSource}
         locale={{ emptyText: 'You are not in any games.' }}
         pagination={false}
       />

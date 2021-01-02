@@ -13,4 +13,14 @@ export interface GameLobbyData {
    * Whether the game is played online or offline.
    */
   readonly online: boolean;
+
+  /**
+   * Last updated timestamp.
+   */
+  readonly lastUpdate: number;
+
+  /**
+   * Type of game saved data.
+   */
+  readonly kind: 'Lobby';
 }
