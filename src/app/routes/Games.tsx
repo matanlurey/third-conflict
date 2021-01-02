@@ -128,7 +128,7 @@ function ViewLobby(props: GameLobbyData): JSX.Element {
           label="Name"
           extra={<>Used for identifying the game only.</>}
         >
-          <Input readOnly minLength={10} maxLength={20} />
+          <Input readOnly minLength={10} maxLength={20} value={props.name} />
         </Form.Item>
         <Form.Item
           label="Seed"
