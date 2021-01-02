@@ -23,6 +23,11 @@ export interface GameStateData {
   readonly players: PlayerStateData[];
 
   /**
+   * Systems in the game.
+   */
+  readonly systems: SystemData[];
+
+  /**
    * Type of game saved data.
    */
   readonly kind: 'Game';
@@ -69,4 +74,36 @@ export class Point {
       Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)).toFixed(2),
     );
   }
+}
+
+/**
+ * Represents a "tag" for control of an entity.
+ */
+export type OwnerData = 'empire' | { player: string };
+
+/**
+ * Represents a star system.
+ */
+export interface SystemData {
+  /**
+   * Position of the system.
+   */
+  readonly position: PointData;
+
+  /**
+   * Name of the system.
+   */
+  readonly name: string;
+
+  /**
+   * If defined, the userId of the which player this is a home system of.
+   */
+  readonly home: OwnerData | undefined;
+
+  /**
+   * The userId of which player controls the system.
+   *
+   * Note, this may conflict with @member home or individual planet control.
+   */
+  readonly owner: OwnerData;
 }

@@ -142,6 +142,7 @@ export abstract class MapGenerator {
 
   abstract generateMap(
     systems: number,
+    players: number,
   ): { position: PointData; name: string }[];
 }
 
@@ -159,11 +160,14 @@ export class PoissonMapGenerator extends MapGenerator {
       : sampler;
   }
 
-  generateMap(systems: number): { position: PointData; name: string }[] {
-    // TODO: Shuffle this list based on the seed.
+  generateMap(
+    systems: number,
+    players: number,
+  ): { position: PointData; name: string; home: boolean }[] {
     const names = this.fetchNames(systems);
+    names.sort(() => this.prando.nextInt(-1, 1));
     const points = this.sampler.points(systems);
-    const result: { position: PointData; name: string }[] = [];
+    const result: { position: PointData; name: string; home: boolean }[] = [];
     for (let i = 0; i < points.length; i++) {
       result.push({
         name: names[i],
@@ -171,7 +175,11 @@ export class PoissonMapGenerator extends MapGenerator {
           Math.max(Math.ceil(points[i][0] - 1), 0),
           Math.max(Math.ceil(points[i][1] - 1), 0),
         ],
+        home: false,
       });
+    }
+    while (players--) {
+      this.pickFairestHomeSystem(result).home = true;
     }
     return this.reducePositionsToOrigin(result);
   }

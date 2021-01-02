@@ -4,7 +4,7 @@ import Prando from 'prando';
 import React, { useContext, useEffect, useState } from 'react';
 import { Link, Route, Switch, useHistory, useParams } from 'react-router-dom';
 import { GameLobbyData } from '../../common/game-lobby';
-import { PointData } from '../../common/game-state';
+import { GameStateData, PointData } from '../../common/game-state';
 import { PoissonMapGenerator } from '../../common/map-generator';
 import { NameGenerator } from '../../common/name-generator';
 import { PoissonDiskSampler } from '../../common/poisson-disk';
@@ -78,14 +78,18 @@ function CreateGame(): JSX.Element {
   );
 }
 
-function ViewLobby(props: GameLobbyData): JSX.Element {
+function ViewLobby(
+  props: GameLobbyData & {
+    onStart: () => void;
+  },
+): JSX.Element {
   const storage = useContext(LocalStorageContext);
   const { replace } = useHistory();
   const aiPlayers = new Array(props.players - 1).fill('');
   const [seed, setSeed] = useState(() => new Prando().nextString(10));
   const [systems, setSystems] = useState(Math.ceil(props.players * 3));
   const [preview, setPreview] = useState<
-    { position: PointData; name: string }[]
+    { position: PointData; name: string; home: boolean }[]
   >([]);
   useEffect(() => {
     const prando = new Prando(seed);
@@ -97,7 +101,7 @@ function ViewLobby(props: GameLobbyData): JSX.Element {
       prando,
     );
     const generator = new PoissonMapGenerator(sampler, prando);
-    setPreview(generator.generateMap(systems));
+    setPreview(generator.generateMap(systems, props.players));
   }, [seed, systems]);
   return (
     <>
@@ -123,7 +127,22 @@ function ViewLobby(props: GameLobbyData): JSX.Element {
         })}
       </List>
       <h3>Settings</h3>
-      <Form labelCol={{ span: 1 }} wrapperCol={{ span: 4 }}>
+      <Form
+        labelCol={{ span: 1 }}
+        wrapperCol={{ span: 4 }}
+        onFinish={() => {
+          const output: GameStateData = {
+            name: props.name,
+            kind: 'Game',
+            lastUpdate: new Date().getTime(),
+            online: props.online,
+            players: [],
+            systems: [],
+          };
+          storage.set(output);
+          props.onStart();
+        }}
+      >
         <Form.Item
           label="Name"
           extra={<>Used for identifying the game only.</>}
@@ -157,7 +176,7 @@ function ViewLobby(props: GameLobbyData): JSX.Element {
           />
         </Form.Item>
         <p className="games-buttons">
-          <Button type="primary" disabled htmlType="submit">
+          <Button type="primary" htmlType="submit" disabled={props.online}>
             Start
           </Button>
           <Button
@@ -178,7 +197,7 @@ function ViewLobby(props: GameLobbyData): JSX.Element {
 function ViewGameOrLobby(): JSX.Element {
   const params = useParams<{ readonly name: string }>();
   const storage = useContext(LocalStorageContext);
-  const localGame = storage.get(params.name);
+  const [localGame, setLocalGame] = useState(storage.get(params.name));
   const { goBack } = useHistory();
   if (!localGame) {
     return (
@@ -191,7 +210,14 @@ function ViewGameOrLobby(): JSX.Element {
       </>
     );
   } else if (localGame.kind === 'Lobby') {
-    return <ViewLobby {...localGame} />;
+    return (
+      <ViewLobby
+        {...localGame}
+        onStart={() => {
+          setLocalGame(storage.get(params.name));
+        }}
+      />
+    );
   } else {
     return (
       <>
@@ -211,8 +237,11 @@ function ListGames(): JSX.Element {
       return {
         name: <Link to={`/games/${v.name}`}>{v.name}</Link>,
         key: v.name,
-        players: v.players,
-        status: v.kind === 'Lobby' && !v.online ? 'Lobby (Host)' : 'Unknown',
+        players: typeof v.players === 'number' ? v.players : v.players.length,
+        status:
+          v.kind === 'Lobby' && !v.online
+            ? 'Local (Not Started)'
+            : 'In Progress',
       };
     });
   return (
