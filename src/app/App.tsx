@@ -15,10 +15,6 @@ import { Default } from './routes/Default';
 import { GamesRoute } from './routes/Games';
 
 function app(): JSX.Element {
-  const [baseName] = useState(() => {
-    const result = document.head.baseURI;
-    return result.indexOf('localhost') === -1 ? undefined : result;
-  });
   const [cookies, setCookies] = useCookies(['auth']);
   const [authState, setAuthState] = useState<GlobalAuthState>(cookies['auth']);
 
@@ -28,12 +24,12 @@ function app(): JSX.Element {
   };
 
   return (
-    <Router basename={baseName}>
+    <Router>
       <Layout>
         <Layout.Header>
           <div className="logo">
             <Link to="/">
-              <img src={`${baseName || ''}/images/logo.png`} />
+              <img src="/images/logo.png" />
             </Link>
           </div>
           <Menu theme="dark" mode="horizontal" selectable={false}>
