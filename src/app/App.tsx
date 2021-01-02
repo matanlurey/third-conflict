@@ -33,7 +33,7 @@ function app(): JSX.Element {
         <Layout.Header>
           <div className="logo">
             <Link to="/">
-              <img src="images/logo.png" />
+              <img src={`${baseName || '/'}images/logo.png`} />
             </Link>
           </div>
           <Menu theme="dark" mode="horizontal" selectable={false}>

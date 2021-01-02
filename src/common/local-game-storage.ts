@@ -1,31 +1,40 @@
 import { GameLobbyData } from './game-lobby';
+import { GameStateData } from './game-state';
 
 export class LocalGameStorage {
-  public readonly lobbies: GameLobbyData[];
+  public readonly games: (GameStateData | GameLobbyData)[];
 
   constructor() {
-    const lobbyData = localStorage.getItem('lobbies') || '[]';
-    const lobbies: GameLobbyData[] = [];
+    const data = localStorage.getItem('games') || '[]';
     try {
-      const decodedLobby = JSON.parse(lobbyData);
-      lobbies.push(...decodedLobby);
-    } catch (_) {
-    } finally {
-      this.lobbies = lobbies;
+      this.games = JSON.parse(data);
+    } catch (e) {
+      console.warn(e);
+      this.games = [];
     }
   }
 
-  private writeChanges(): void {
-    localStorage.setItem('lobbies', JSON.stringify(this.lobbies));
+  protected writeChanges(): void {
+    localStorage.setItem('games', JSON.stringify(this.games));
   }
 
-  add(data: GameLobbyData): void {
-    this.lobbies.push(data);
+  set(data: GameLobbyData | GameStateData): void {
+    for (let i = 0; i < this.games.length; i++) {
+      if (this.games[i].name === data.name) {
+        this.games[i] = {
+          ...data,
+          lastUpdate: new Date().getTime(),
+        };
+        this.writeChanges();
+        return;
+      }
+    }
+    this.games.push(data);
     this.writeChanges();
   }
 
-  get(name: string): GameLobbyData | undefined {
-    for (const lobby of this.lobbies) {
+  get(name: string): GameLobbyData | GameStateData | undefined {
+    for (const lobby of this.games) {
       if (lobby.name === name) {
         return lobby;
       }
@@ -33,9 +42,9 @@ export class LocalGameStorage {
   }
 
   remove(name: string): void {
-    for (let i = 0; i < this.lobbies.length; i++) {
-      if (this.lobbies[i].name === name) {
-        this.lobbies.splice(i, 1);
+    for (let i = 0; i < this.games.length; i++) {
+      if (this.games[i].name === name) {
+        this.games.splice(i, 1);
         break;
       }
     }

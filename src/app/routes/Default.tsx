@@ -11,8 +11,8 @@ export function Default(): JSX.Element {
         Welcome back to <strong>Third Conflict</strong>
       </h1>
       <p>
-        You have{' '}
-        <Link to="/games">{storage.lobbies.length} pending game(s)</Link>.
+        You have <Link to="/games">{storage.games.length} pending game(s)</Link>
+        .
       </p>
     </>
   );

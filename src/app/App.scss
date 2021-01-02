@@ -13,11 +13,16 @@
 .ant-layout-header {
   padding: 0px 5px;
 
+  a {
+    text-decoration: none;
+  }
+
   .ant-menu {
     font-family: 'Futile Pro';
     text-transform: uppercase;
     font-size: x-small;
     float: right;
+    letter-spacing: 1px;
 
     .ant-menu-item {
       padding: 0px 10px;
