@@ -2,6 +2,10 @@ import { PointData } from './game-state';
 import { MapGenerator } from './map-generator';
 
 class TestMapGenerator extends MapGenerator {
+  generateMap(): { position: PointData; name: string }[] {
+    throw new Error('Unimplemented');
+  }
+
   reducePositionsToOrigin<
     T extends {
       position: PointData;
