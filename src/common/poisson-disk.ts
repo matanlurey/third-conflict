@@ -1,4 +1,5 @@
 import Prando from 'prando';
+import { PointData } from './game-state';
 
 function dist2(x1: number, y1: number, x2: number, y2: number): number {
   return (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
@@ -27,7 +28,7 @@ export class PoissonDiskSampler {
   constructor(
     viewport: [number, number],
     minDistance = 1,
-    private readonly maxTries = 30,
+    maxTries = 30,
     private readonly prando = new Prando(),
   ) {
     this.xMax = viewport[0];
@@ -59,7 +60,7 @@ export class PoissonDiskSampler {
    * @param x
    * @param y
    */
-  private createPoint(x: number, y: number): [number, number] {
+  private createPoint(x: number, y: number): PointData {
     const index =
       Math.floor(x / this.cellSize) +
       Math.floor(y / this.cellSize) * this.state.width;
@@ -108,7 +109,7 @@ export class PoissonDiskSampler {
   /**
    * Returns the next point in the sampling, or `null` if there is no more.
    */
-  nextPoint(): [number, number] | null {
+  nextPoint(): PointData | null {
     let x = 0;
     let y = 0;
     if (this.firstPoint) {

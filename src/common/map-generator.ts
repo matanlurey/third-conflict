@@ -1,5 +1,6 @@
 import Prando from 'prando';
 import { Point, PointData } from './game-state';
+import { PoissonDiskSampler } from './poisson-disk';
 
 export abstract class MapGenerator {
   constructor(
@@ -137,5 +138,41 @@ export abstract class MapGenerator {
         position: [x, y],
       };
     });
+  }
+
+  abstract generateMap(
+    systems: number,
+  ): { position: PointData; name: string }[];
+}
+
+export class PoissonMapGenerator extends MapGenerator {
+  private readonly sampler: PoissonDiskSampler;
+
+  constructor(
+    sampler: PoissonDiskSampler | [number, number],
+    prando?: Prando,
+    names?: string[],
+  ) {
+    super(prando, names);
+    this.sampler = Array.isArray(sampler)
+      ? new PoissonDiskSampler(sampler, 4, undefined, prando)
+      : sampler;
+  }
+
+  generateMap(systems: number): { position: PointData; name: string }[] {
+    // TODO: Shuffle this list based on the seed.
+    const names = this.fetchNames(systems);
+    const points = this.sampler.points(systems);
+    const result: { position: PointData; name: string }[] = [];
+    for (let i = 0; i < points.length; i++) {
+      result.push({
+        name: names[i],
+        position: [
+          Math.max(Math.ceil(points[i][0] - 1), 0),
+          Math.max(Math.ceil(points[i][1] - 1), 0),
+        ],
+      });
+    }
+    return this.reducePositionsToOrigin(result);
   }
 }
