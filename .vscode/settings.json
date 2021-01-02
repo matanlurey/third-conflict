@@ -67,6 +67,8 @@
     "Sider",
     "antd",
     "peaceiris",
-    "preconnect"
+    "popd",
+    "preconnect",
+    "pushd"
   ]
 }
