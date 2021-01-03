@@ -33,4 +33,13 @@ export abstract class GameClient {
    * Creates a game (lobby).
    */
   abstract gamesCreate(name: string, players: number): Promise<GameLobbyData>;
+
+  /**
+   * Starts a game.
+   */
+  abstract gamesStart(
+    name: string,
+    seed: string,
+    systems: number,
+  ): Promise<GameListData>;
 }

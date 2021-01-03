@@ -73,6 +73,11 @@ export interface GameStateData {
   readonly lastUpdated: number;
 
   /**
+   * Which player created and administrates the game.
+   */
+  readonly createdBy: string;
+
+  /**
    * Players in the game.
    */
   readonly players: PlayerStateData[];
@@ -86,6 +91,32 @@ export interface GameStateData {
    * Type of game saved data.
    */
   readonly kind: 'Game';
+
+  /**
+   * Settings in the game.
+   */
+  readonly settings: GameSettingsData;
+}
+
+/**
+ * Represents settings in the game.
+ */
+export interface GameSettingsData {
+  /**
+   * How many factories initial systems start with.
+   *
+   * The more factories the faster a system can churn out units. This number
+   * is also used as the maximum number of factories that an imperial system
+   * will build.
+   */
+  readonly initialFactories: number;
+
+  /**
+   * How many units of distance a ship moves a turn, maximum.
+   *
+   * The faster the speed the farther ships can make it every "tick" of the game.
+   */
+  readonly shipSpeedATurn: number;
 }
 
 /**
@@ -134,7 +165,7 @@ export class Point {
 /**
  * Represents a "tag" for control of an entity.
  */
-export type OwnerData = 'empire' | { player: string };
+export type OwnerData = 'Empire' | { player: string };
 
 /**
  * Represents a star system.
@@ -151,9 +182,9 @@ export interface SystemData {
   readonly name: string;
 
   /**
-   * If defined, the userId of the which player this is a home system of.
+   * The userId of the which player this is a home system of.
    */
-  readonly home: OwnerData | undefined;
+  readonly home: OwnerData;
 
   /**
    * The userId of which player controls the system.

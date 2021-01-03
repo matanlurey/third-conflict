@@ -11,12 +11,13 @@ import { MapPreview } from '../../ui/Map';
 
 export function GameLobby(props: {
   data: GameLobbyData;
-  onStart: () => void;
+  onStart: (seed: string, systems: number) => void;
 }): JSX.Element {
   const client = useContext(GameClientContext);
   const { replace } = useHistory();
   const listAiPlayers = new Array(props.data.players - 1).fill('');
   const [seed, setSeed] = useState(props.data.seed);
+  const [pending, setPending] = useState(false);
   const [systems, setSystems] = useState(Math.ceil(props.data.players * 3));
   const [preview, setPreview] = useState<
     { position: PointData; name: string; home: boolean }[]
@@ -63,7 +64,8 @@ export function GameLobby(props: {
         labelCol={{ span: 1 }}
         wrapperCol={{ span: 4 }}
         onFinish={() => {
-          // FIXME: Implement.
+          setPending(true);
+          props.onStart(seed, systems);
         }}
       >
         <Form.Item
@@ -104,12 +106,14 @@ export function GameLobby(props: {
           />
         </Form.Item>
         <p className="games-buttons">
-          <Button type="primary" htmlType="submit">
+          <Button type="primary" htmlType="submit" disabled={pending}>
             Start
           </Button>
           <Button
             danger
+            disabled={pending}
             onClick={async () => {
+              setPending(true);
               await client.gamesDelete(props.data.name);
               replace('/games');
             }}

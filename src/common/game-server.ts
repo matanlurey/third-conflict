@@ -1,14 +1,14 @@
 import Prando from 'prando';
+import { RandomSpawner } from './game-logic';
 import { GameListData, GameLobbyData, GameStateData } from './game-state';
-
-function deepClone<T>(input: T): T {
-  return JSON.parse(JSON.stringify(input));
-}
+import { deepClone } from './utils';
 
 /**
  * Represents a game server.
  */
 export class GameServer {
+  private readonly spawner = new RandomSpawner();
+
   constructor(
     protected readonly games: {
       [key: string]: GameLobbyData | GameStateData;
@@ -117,13 +117,69 @@ export class GameServer {
    * @param _player
    * @param request
    */
-  onGamesDelete(
+  async onGamesDelete(
     _player: string,
     request: {
       name: string;
     },
   ): Promise<void> {
     // TODO: Enforce player created the game being deleted or is an admin.
+    // TODO: Enforce the game exists.
     return this.deleteState(request.name);
+  }
+
+  /**
+   * Processes a game start request.
+   *
+   * @param player
+   * @param request
+   */
+  async onGamesStart(
+    player: string,
+    request: {
+      name: string;
+      seed: string;
+      systems: number;
+    },
+  ): Promise<GameListData> {
+    // TODO: Enforce player created the game being started.
+    // TODO: Enforce the game exists and hasn't already been started.
+    // TODO: Enforce the player is in the game that is starting.
+    // TODO: Enforce systems are valid.
+    const pending = (await this.readState(request.name)) as GameLobbyData;
+    // TODO: Support multiplayer.
+    const players = [
+      { name: 'Human', userId: 'Guest' },
+      ...new Array(pending.players - 1).fill(null).map((_, i) => {
+        return {
+          name: `AI ${i + 1}`,
+          userId: `ai-${i + 1}`,
+        };
+      }),
+    ];
+    const systems = this.spawner.spawnInitialSystems(
+      new Prando(request.seed),
+      request.systems,
+      players,
+    );
+    const result = await this.writeState(request.name, {
+      name: pending.name,
+      lastUpdated: this.currentTime(),
+      createdBy: player,
+      kind: 'Game',
+      players,
+      systems,
+      settings: {
+        // TODO: Allow customization of these settings.
+        initialFactories: 10,
+        shipSpeedATurn: 4,
+      },
+    });
+    return {
+      name: result.name,
+      kind: result.kind,
+      lastUpdated: result.lastUpdated,
+      players: result.players.length,
+    };
   }
 }

@@ -32,8 +32,8 @@ function ViewGameOrLobby(): JSX.Element {
     return (
       <GameLobby
         data={game as GameLobbyData}
-        onStart={async () => {
-          setGame(await client.gamesCreate(params.name, game.players));
+        onStart={async (seed, systems) => {
+          setGame(await client.gamesStart(params.name, seed, systems));
         }}
       />
     );

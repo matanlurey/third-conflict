@@ -65,6 +65,14 @@ export class LocalGameClient extends GameClient {
   async gamesCreate(name: string, players: number): Promise<GameLobbyData> {
     return this.server.onGamesCreate(this.player, { name, players });
   }
+
+  async gamesStart(
+    name: string,
+    seed: string,
+    systems: number,
+  ): Promise<GameListData> {
+    return this.server.onGamesStart(this.player, { name, seed, systems });
+  }
 }
 
 export const GameClientContext = React.createContext<GameClient>(
