@@ -132,6 +132,71 @@ export interface PlayerStateData {
    * User ID of the player (guaranteed unique).
    */
   readonly userId: string;
+
+  /**
+   * A view of the game revealed to the player.
+   */
+  readonly fogOfWar: FogOfWarGameData;
+}
+
+/**
+ * Represents a player's view of @see GameStateData.
+ */
+export interface FogOfWarGameData {
+  /**
+   * @see GameStateData.kind.
+   */
+  readonly kind: 'Game';
+
+  /**
+   * @see GameStateData.name.
+   */
+  readonly name: string;
+
+  /**
+   * @see GameStateData.players.
+   */
+  readonly players: number;
+
+  /**
+   * Whether this player is a server-driven agent, and does not end their turn.
+   */
+  readonly serverAgent: boolean;
+
+  /**
+   * Whether player ended their turn.
+   */
+  readonly endedTurn: boolean;
+
+  /**
+   * @see GameStateData.systems.
+   */
+  readonly systems: FogOfWarSystemData[];
+}
+
+/**
+ * How a @see SystemData is seen by another player.
+ */
+export type HudIndicatorTag = 'Self' | 'Empire' | 'Enemy' | undefined;
+
+/**
+ * Represents a player's view of @see SystemData.
+ */
+export interface FogOfWarSystemData {
+  /**
+   * @see SystemData.name.
+   */
+  readonly name: string;
+
+  /**
+   * @see SystemData.position.
+   */
+  readonly position: PointData;
+
+  /**
+   * @see HudIndicatorTag.
+   */
+  readonly status: HudIndicatorTag;
 }
 
 /**
@@ -192,4 +257,29 @@ export interface SystemData {
    * Note, this may conflict with @member home or individual planet control.
    */
   readonly owner: OwnerData;
+
+  /**
+   * Orbiting fleet controlled by @member owner.
+   */
+  readonly orbit: FleetData;
+}
+
+/**
+ * Represents a collection of ships.
+ */
+export interface FleetData {
+  /**
+   * WarShips that are part of this fleet.
+   */
+  readonly warships: number;
+
+  /**
+   * Transports that are part of this fleet.
+   */
+  readonly transports: number;
+
+  /**
+   * Troops that are on board @member transports.
+   */
+  readonly troops: number;
 }

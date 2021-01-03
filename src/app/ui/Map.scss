@@ -1,0 +1,27 @@
+.map-preview {
+  display: flex;
+
+  tbody {
+    flex: 1;
+  }
+
+  tr {
+    display: flex;
+
+    td {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 35px;
+      width: 35px;
+
+      border: 1px dotted darken(#777, 40);
+      color: #777;
+
+      &.self {
+        color: aqua;
+        border-color: darken(aqua, 40);
+      }
+    }
+  }
+}
