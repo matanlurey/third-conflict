@@ -9,6 +9,7 @@ TBD.
 ### Framework
 
 - [x] Basic UI Scaffold.
+- [ ] Add proxy server API, including local game mode.
 - [ ] Create/Start/End Local Game.
 - [ ] Home: Show latest N games.
 - [ ] Logo: "Push" notification symbol/bubble.

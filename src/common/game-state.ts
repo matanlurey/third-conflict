@@ -1,4 +1,64 @@
 /**
+ * Represents minimal information about a game for listing purposes.
+ */
+export interface GameListData {
+  /**
+   * Name of the game, used for matchmaking and reference purposes.
+   */
+  readonly name: string;
+
+  /**
+   * Number of players.
+   */
+  readonly players: number;
+
+  /**
+   * Last updated timestamp.
+   */
+  readonly lastUpdated: number;
+
+  /**
+   * Type of game saved data.
+   */
+  readonly kind: 'Lobby' | 'Game';
+}
+
+/**
+ * Represents a game that has not yet been started.
+ */
+export interface GameLobbyData {
+  /**
+   * Name of the game, used for matchmaking and reference purposes.
+   */
+  readonly name: string;
+
+  /**
+   * Used to procedurally generate the map and empire.
+   */
+  readonly seed: string;
+
+  /**
+   * Which player created and administrates the game.
+   */
+  readonly createdBy: string;
+
+  /**
+   * Last updated timestamp.
+   */
+  readonly lastUpdated: number;
+
+  /**
+   * Number of players.
+   */
+  readonly players: number;
+
+  /**
+   * Type of game saved data.
+   */
+  readonly kind: 'Lobby';
+}
+
+/**
  * Represents the complete game state at a point of time.
  */
 export interface GameStateData {
@@ -8,14 +68,9 @@ export interface GameStateData {
   readonly name: string;
 
   /**
-   * Whether the game is played online or offline.
-   */
-  readonly online: boolean;
-
-  /**
    * Last updated timestamp.
    */
-  readonly lastUpdate: number;
+  readonly lastUpdated: number;
 
   /**
    * Players in the game.

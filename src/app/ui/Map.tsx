@@ -33,7 +33,7 @@ export interface MapProps {
   systems: { position: PointData; name: string }[];
 }
 
-export function Map(props: MapProps): JSX.Element {
+export function MapPreview(props: MapProps): JSX.Element {
   return (
     <pre style={{ border: '1px dashed #666', padding: '5px' }}>
       {simpleVisualize(props.systems)
