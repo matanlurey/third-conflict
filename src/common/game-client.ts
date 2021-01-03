@@ -1,4 +1,4 @@
-import { GameListData, GameLobbyData } from './game-state';
+import { FogOfWarGameData, GameListData, GameLobbyData } from './game-state';
 
 /**
  * Represents a connection to a game server.
@@ -17,7 +17,9 @@ export abstract class GameClient {
   /**
    * Fetches a single game.
    */
-  abstract gamesFetch(name: string): Promise<GameListData | undefined>;
+  abstract gamesFetch(
+    name: string,
+  ): Promise<FogOfWarGameData | GameListData | undefined>;
 
   /**
    * Lists active games.
@@ -41,5 +43,5 @@ export abstract class GameClient {
     name: string,
     seed: string,
     systems: number,
-  ): Promise<GameListData>;
+  ): Promise<FogOfWarGameData>;
 }

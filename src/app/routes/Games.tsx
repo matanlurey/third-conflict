@@ -1,17 +1,24 @@
 import { Button } from 'antd';
 import React, { useContext, useEffect, useState } from 'react';
 import { Route, Switch, useHistory, useParams } from 'react-router-dom';
-import { GameListData, GameLobbyData } from '../../common/game-state';
+import {
+  FogOfWarGameData,
+  GameListData,
+  GameLobbyData,
+} from '../../common/game-state';
 import { GameClientContext } from '../contexts/client';
 import './Games.scss';
 import { CreateGames } from './Games/Create';
 import { ListGames } from './Games/List';
-import { GameLobby } from './Games/Lobby';
+import { ViewGameLobby } from './Games/Lobby';
+import { PlayGame } from './Games/Play';
 
 function ViewGameOrLobby(): JSX.Element {
   const params = useParams<{ readonly name: string }>();
   const client = useContext(GameClientContext);
-  const [game, setGame] = useState<GameListData | GameLobbyData | undefined>();
+  const [game, setGame] = useState<
+    GameListData | FogOfWarGameData | undefined
+  >();
   useEffect(() => {
     (async () => {
       setGame(await client.gamesFetch(params.name));
@@ -30,7 +37,7 @@ function ViewGameOrLobby(): JSX.Element {
     );
   } else if (game.kind === 'Lobby') {
     return (
-      <GameLobby
+      <ViewGameLobby
         data={game as GameLobbyData}
         onStart={async (seed, systems) => {
           setGame(await client.gamesStart(params.name, seed, systems));
@@ -38,11 +45,7 @@ function ViewGameOrLobby(): JSX.Element {
       />
     );
   } else {
-    return (
-      <>
-        Game for <code>{params.name}</code>
-      </>
-    );
+    return <PlayGame state={game as FogOfWarGameData} />;
   }
 }
 

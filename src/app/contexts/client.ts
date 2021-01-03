@@ -2,6 +2,7 @@ import React from 'react';
 import { GameClient } from '../../common/game-client';
 import { GameServer } from '../../common/game-server';
 import {
+  FogOfWarGameData,
   GameListData,
   GameLobbyData,
   GameStateData,
@@ -50,8 +51,8 @@ export class LocalGameClient extends GameClient {
 
   async gamesFetch(
     name: string,
-  ): Promise<GameLobbyData | GameListData | undefined> {
-    return this.server.onGamesFetch(name);
+  ): Promise<GameLobbyData | GameListData | FogOfWarGameData | undefined> {
+    return this.server.onGamesFetch(this.player, name);
   }
 
   async gamesList(): Promise<GameListData[]> {
@@ -70,7 +71,7 @@ export class LocalGameClient extends GameClient {
     name: string,
     seed: string,
     systems: number,
-  ): Promise<GameListData> {
+  ): Promise<FogOfWarGameData> {
     return this.server.onGamesStart(this.player, { name, seed, systems });
   }
 }

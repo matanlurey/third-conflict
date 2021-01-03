@@ -1,12 +1,19 @@
 import Prando from 'prando';
-import { RandomSpawner } from './game-logic';
-import { GameListData, GameLobbyData, GameStateData } from './game-state';
+import { FogOfWar, RandomSpawner, viewGameStateAs } from './game-logic';
+import {
+  FogOfWarGameData,
+  GameListData,
+  GameLobbyData,
+  GameStateData,
+  PlayerStateData,
+} from './game-state';
 import { deepClone } from './utils';
 
 /**
  * Represents a game server.
  */
 export class GameServer {
+  private readonly fogOfWar = new FogOfWar();
   private readonly spawner = new RandomSpawner();
 
   constructor(
@@ -57,19 +64,15 @@ export class GameServer {
    * Processes a game fetch request.
    */
   async onGamesFetch(
+    player: string,
     name: string,
-  ): Promise<GameLobbyData | GameListData | undefined> {
+  ): Promise<GameLobbyData | GameListData | FogOfWarGameData | undefined> {
     for (const game of Object.values(this.games)) {
       if (game.name === name) {
         if (game.kind === 'Lobby') {
           return game;
         } else {
-          return {
-            name: game.name,
-            kind: game.kind,
-            lastUpdated: game.lastUpdated,
-            players: game.players.length,
-          };
+          return viewGameStateAs(game, player);
         }
       }
     }
@@ -141,19 +144,20 @@ export class GameServer {
       seed: string;
       systems: number;
     },
-  ): Promise<GameListData> {
+  ): Promise<FogOfWarGameData> {
     // TODO: Enforce player created the game being started.
     // TODO: Enforce the game exists and hasn't already been started.
     // TODO: Enforce the player is in the game that is starting.
     // TODO: Enforce systems are valid.
     const pending = (await this.readState(request.name)) as GameLobbyData;
     // TODO: Support multiplayer.
-    const players = [
-      { name: 'Human', userId: 'Guest' },
+    const players: PlayerStateData[] = [
+      { name: 'Human', userId: 'Guest', fogOfWar: {} as FogOfWarGameData },
       ...new Array(pending.players - 1).fill(null).map((_, i) => {
         return {
           name: `AI ${i + 1}`,
           userId: `ai-${i + 1}`,
+          fogOfWar: {} as FogOfWarGameData,
         };
       }),
     ];
@@ -162,7 +166,7 @@ export class GameServer {
       request.systems,
       players,
     );
-    const result = await this.writeState(request.name, {
+    const initialState: GameStateData = {
       name: pending.name,
       lastUpdated: this.currentTime(),
       createdBy: player,
@@ -174,12 +178,24 @@ export class GameServer {
         initialFactories: 10,
         shipSpeedATurn: 4,
       },
-    });
-    return {
-      name: result.name,
-      kind: result.kind,
-      lastUpdated: result.lastUpdated,
-      players: result.players.length,
     };
+    const stateWithFogOfWar: GameStateData = {
+      ...initialState,
+      players: initialState.players.map((player) => {
+        return {
+          ...player,
+          fogOfWar: this.fogOfWar.createInitialFogOfWar(
+            initialState,
+            // TODO: Do a more proper encoding.
+            player.userId.startsWith('ai-'),
+            player.userId,
+          ),
+        };
+      }),
+    };
+    console.log(stateWithFogOfWar);
+    await this.writeState(request.name, stateWithFogOfWar);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return viewGameStateAs(stateWithFogOfWar, player)!;
   }
 }

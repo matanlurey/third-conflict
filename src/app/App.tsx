@@ -13,6 +13,7 @@ import { GlobalAuthContext, GlobalAuthState } from './contexts/auth';
 import { AccountRoute } from './routes/Account';
 import { Default } from './routes/Default';
 import { GamesRoute } from './routes/Games';
+import { SettingsRoute } from './routes/Settings';
 
 function app(): JSX.Element {
   const [cookies, setCookies] = useCookies(['auth']);
@@ -39,7 +40,7 @@ function app(): JSX.Element {
             <Menu.Item icon={<UserOutlined />}>
               <Link to="/account">Account</Link>
             </Menu.Item>
-            <Menu.Item disabled icon={<SettingOutlined />}>
+            <Menu.Item icon={<SettingOutlined />}>
               <Link to="/settings">Settings</Link>
             </Menu.Item>
           </Menu>
@@ -47,13 +48,11 @@ function app(): JSX.Element {
         <GlobalAuthContext.Provider value={authState}>
           <Layout.Content>
             <Switch>
-              <Route path="/games">
-                <GamesRoute />
-              </Route>
+              <Route path="/games" component={GamesRoute} />
               <Route path="/account">
                 <AccountRoute onChange={updateAuth} />
               </Route>
-              <Route path="/settings">Hello Settings</Route>
+              <Route path="/settings" component={SettingsRoute} />
               <Route path="/">
                 {!authState ? (
                   <>

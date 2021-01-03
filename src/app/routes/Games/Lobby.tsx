@@ -9,7 +9,7 @@ import { PoissonDiskSampler } from '../../../common/poisson-disk';
 import { GameClientContext } from '../../contexts/client';
 import { MapPreview } from '../../ui/Map';
 
-export function GameLobby(props: {
+export function ViewGameLobby(props: {
   data: GameLobbyData;
   onStart: (seed: string, systems: number) => void;
 }): JSX.Element {
