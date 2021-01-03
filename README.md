@@ -9,8 +9,18 @@ TBD.
 ### Framework
 
 - [x] Basic UI Scaffold.
-- [ ] Add proxy server API, including local game mode.
-- [ ] Create/Start/End Local Game.
+- [x] Add proxy server API, including local game mode.
+- [x] Create/Start/End Local Game.
+- [ ] Create initial systems with "novice" mode:
+  - Planets (w/ Troops)
+  - Factories
+  - WarShips
+  - Transports (w/ Troops)
+- [ ] Add end turn logic.
+- [ ] Add end turn reporting.
+- [ ] Add fleet movement:
+  - F2F
+  - Combat.
 - [ ] Home: Show latest N games.
 - [ ] Logo: "Push" notification symbol/bubble.
 - [ ] Login with Discord.
