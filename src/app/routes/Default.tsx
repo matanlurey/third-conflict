@@ -1,18 +1,25 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { LocalStorageContext } from '../contexts/storage';
+import { GameClientContext } from '../contexts/client';
 import './Default.scss';
 
 export function Default(): JSX.Element {
-  const storage = useContext(LocalStorageContext);
+  const client = useContext(GameClientContext);
+  const [pendingGames, setPendingGames] = useState<number | undefined>();
+  useEffect(() => {
+    (async () => {
+      const gameList = await client.gamesList();
+      setPendingGames(gameList.length);
+    })();
+  }, [client]);
   return (
     <>
       <h1>
         Welcome back to <strong>Third Conflict</strong>
       </h1>
       <p>
-        You have <Link to="/games">{storage.games.length} pending game(s)</Link>
-        .
+        {/* TODO: Show loading indicator. */}
+        You have <Link to="/games">{pendingGames} pending game(s)</Link>.
       </p>
     </>
   );
