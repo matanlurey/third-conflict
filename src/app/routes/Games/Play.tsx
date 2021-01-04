@@ -1,44 +1,33 @@
-import { Empty, Modal } from 'antd';
+import { Tabs } from 'antd';
+import React from 'react';
 import { FogOfWarGameData } from '../../../common/game-state';
 import { GameHeader } from '../../ui/Header';
 import { MapPreview } from '../../ui/Map';
 
 export function PlayGame(props: {
   state: FogOfWarGameData;
-  showReports: boolean;
   onEndTurn: () => Promise<void>;
-  onReports: (show: boolean) => void;
+  onResign: () => Promise<void>;
 }): JSX.Element {
   const { state } = props;
   return (
     <>
-      <Modal
-        title={`Reports for Turn ${state.currentTurn}`}
-        visible={props.showReports}
-        cancelButtonProps={{ style: { display: 'none' } }}
-        okText="Hide"
-        onOk={() => props.onReports(false)}
-        onCancel={() => props.onReports(false)}
-        closable={true}
-        centered={true}
-        maskClosable={true}
-      >
-        <Empty description="Nothing significant to report." />
-      </Modal>
       <GameHeader
         name={state.name}
         players={state.players}
         systems={state.systems.length}
         endedTurn={state.endedTurn}
         onEndTurn={props.onEndTurn}
-        onReports={() => {
-          props.onReports(true);
-        }}
-        onResign={async () => {
-          // TODO: Implement.
-        }}
+        onResign={props.onResign}
       />
-      <MapPreview systems={state.systems} />
+      <Tabs defaultActiveKey="1">
+        <Tabs.TabPane tab="Overview" key="1">
+          <MapPreview systems={state.systems} />
+        </Tabs.TabPane>
+        <Tabs.TabPane tab="Reports" key="2"></Tabs.TabPane>
+        <Tabs.TabPane tab="Systems" key="3"></Tabs.TabPane>
+        <Tabs.TabPane tab="Fleets" key="4"></Tabs.TabPane>
+      </Tabs>
     </>
   );
 }

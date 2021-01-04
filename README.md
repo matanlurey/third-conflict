@@ -24,7 +24,7 @@ TBD.
   - Combat.
 - [ ] Update reporting to actually show content.
 - [ ] Home: Show latest N games.
-- [ ] Add "resign".
+- [x] Add "resign".
 - [ ] Logo: "Push" notification symbol/bubble.
 - [ ] Login with Discord.
 - [ ] Create/Start/End Remote Game.

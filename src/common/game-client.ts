@@ -49,4 +49,9 @@ export abstract class GameClient {
    * Ends your turn.
    */
   abstract gameEndTurn(name: string): Promise<void>;
+
+  /**
+   * Resigns from the game.
+   */
+  abstract gameResign(name: string): Promise<void>;
 }

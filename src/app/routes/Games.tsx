@@ -20,8 +20,6 @@ function ViewGameOrLobby(): JSX.Element {
   const [game, setGame] = useState<
     GameListData | FogOfWarGameData | undefined
   >();
-  const [showReports, setShowReports] = useState(false);
-  const [lastTurn, setLastTurn] = useState(Number.MAX_SAFE_INTEGER);
 
   async function pullGameState() {
     const fetchedGame = await client.gamesFetch(params.name);
@@ -36,16 +34,6 @@ function ViewGameOrLobby(): JSX.Element {
       clearInterval(pollTimer);
     };
   }, [client]);
-
-  useEffect(() => {
-    if (game?.kind === 'Game') {
-      const { currentTurn } = game as FogOfWarGameData;
-      if (currentTurn > lastTurn) {
-        setShowReports(true);
-      }
-      setLastTurn(currentTurn);
-    }
-  }, [game, lastTurn]);
 
   const { goBack } = useHistory();
   if (!game) {
@@ -71,8 +59,9 @@ function ViewGameOrLobby(): JSX.Element {
     return (
       <PlayGame
         state={game as FogOfWarGameData}
-        showReports={showReports}
-        onReports={setShowReports}
+        onResign={async () => {
+          await client.gameResign(game.name);
+        }}
         onEndTurn={async () => {
           // TODO: Make a context object tied to this game.
           await client.gameEndTurn(game.name);

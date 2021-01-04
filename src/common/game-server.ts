@@ -184,12 +184,18 @@ export class GameServer {
     const pending = (await this.readState(request.name)) as GameLobbyData;
     // TODO: Support multiplayer.
     const players: PlayerStateData[] = [
-      { name: 'Human', userId: 'Guest', fogOfWar: {} as FogOfWarGameData },
+      {
+        name: 'Human',
+        userId: 'Guest',
+        fogOfWar: {} as FogOfWarGameData,
+        serverAgent: false,
+      },
       ...new Array(pending.players - 1).fill(null).map((_, i) => {
         return {
           name: `AI ${i + 1}`,
           userId: `ai-${i + 1}`,
           fogOfWar: {} as FogOfWarGameData,
+          serverAgent: true,
         };
       }),
     ];
@@ -222,8 +228,7 @@ export class GameServer {
           ...player,
           fogOfWar: this.fogOfWar.createInitialFogOfWar(
             initialState,
-            // TODO: Do a more proper encoding.
-            player.userId.startsWith('ai-'),
+            player.serverAgent,
             player.userId,
           ),
         };
@@ -257,6 +262,34 @@ export class GameServer {
           request.name,
           this.turnProcessor.nextTurn(result),
         );
+      }
+    }
+  }
+
+  async onGameResign(player: string, request: { name: string }): Promise<void> {
+    const result = await this.writePlayer(request.name, player, (data) => {
+      return {
+        ...data,
+        serverAgent: true,
+        fogOfWar: {
+          ...data.fogOfWar,
+          endedTurn: true,
+        },
+      };
+    });
+    if (result) {
+      // TODO: Add this to the end-turn report for players.
+      const terminateGame = result.players.every((p) => p.serverAgent);
+      if (terminateGame) {
+        await this.deleteState(request.name);
+      } else {
+        const processTurn = result.players.every((p) => p.fogOfWar.endedTurn);
+        if (processTurn) {
+          await this.writeState(
+            request.name,
+            this.turnProcessor.nextTurn(result),
+          );
+        }
       }
     }
   }

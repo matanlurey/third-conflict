@@ -78,6 +78,10 @@ export class LocalGameClient extends GameClient {
   async gameEndTurn(name: string): Promise<void> {
     return this.server.onGameEndTurn(this.player, { name });
   }
+
+  async gameResign(name: string): Promise<void> {
+    return this.server.onGameResign(this.player, { name });
+  }
 }
 
 export const GameClientContext = React.createContext<GameClient>(

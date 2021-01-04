@@ -10,7 +10,6 @@ export interface GameHeaderProps {
 
   onEndTurn: () => Promise<void>;
   onResign: () => Promise<void>;
-  onReports: () => void;
 }
 
 export function GameHeader(props: GameHeaderProps): JSX.Element {
@@ -48,18 +47,20 @@ export function GameHeader(props: GameHeaderProps): JSX.Element {
           </Button>
         </li>
         <li>
-          <Button onClick={props.onReports}>Reports</Button>
-        </li>
-        <li>
           <Button
             danger
-            disabled={true}
             onClick={async () => {
+              if (
+                !window.confirm(
+                  'Are you sure? This will remove you from the game',
+                )
+              ) {
+                return;
+              }
               setPendingPromise(true);
               await props.onResign();
               setPendingPromise(false);
             }}
-            title="Resign: Not yet supported."
           >
             Resign
           </Button>

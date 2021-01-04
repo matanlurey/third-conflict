@@ -139,6 +139,11 @@ export interface PlayerStateData {
   readonly userId: string;
 
   /**
+   * Whether this player is run by a server-driven agent.
+   */
+  readonly serverAgent: boolean;
+
+  /**
    * A view of the game revealed to the player.
    */
   readonly fogOfWar: FogOfWarGameData;
@@ -167,11 +172,6 @@ export interface FogOfWarGameData {
    * @see GameStateData.currentTurn.
    */
   readonly currentTurn: number;
-
-  /**
-   * Whether this player is a server-driven agent, and does not end their turn.
-   */
-  readonly serverAgent: boolean;
 
   /**
    * Whether player ended their turn.
