@@ -19,9 +19,12 @@ TBD.
 - [x] Add end turn logic.
 - [x] Poll for next turn.
 - [x] Add end turn reporting.
+- [ ] Add systems pane
+- [ ] Add fleets pane
 - [ ] Add fleet movement:
   - F2F
   - Combat.
+- [ ] Add points
 - [ ] Update reporting to actually show content.
 - [ ] Home: Show latest N games.
 - [x] Add "resign".

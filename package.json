@@ -6,6 +6,7 @@
   "dependencies": {
     "@ant-design/icons": "^4.3.0",
     "antd": "^4.9.4",
+    "dayjs": "^1.10.1",
     "prando": "^5.1.2",
     "react": "^17.0.1",
     "react-cookie": "^4.0.3",

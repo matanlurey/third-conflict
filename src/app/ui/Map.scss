@@ -24,4 +24,8 @@
       }
     }
   }
+
+  &.selectable td:not(:empty) {
+    cursor: pointer;
+  }
 }
