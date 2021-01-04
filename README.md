@@ -11,12 +11,12 @@ TBD.
 - [x] Basic UI Scaffold.
 - [x] Add proxy server API, including local game mode.
 - [x] Create/Start/End Local Game.
-- [ ] Create initial systems with "novice" mode:
+- [x] Create initial systems with "novice" mode:
   - Planets (w/ Troops)
   - Factories
   - WarShips
   - Transports (w/ Troops)
-- [ ] Add end turn logic.
+- [x] Add end turn logic.
 - [ ] Poll for next turn.
 - [ ] Add end turn reporting.
 - [ ] Add fleet movement:

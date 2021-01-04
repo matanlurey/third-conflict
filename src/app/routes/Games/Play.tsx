@@ -2,7 +2,10 @@ import { FogOfWarGameData } from '../../../common/game-state';
 import { GameHeader } from '../../ui/Header';
 import { MapPreview } from '../../ui/Map';
 
-export function PlayGame(props: { state: FogOfWarGameData }): JSX.Element {
+export function PlayGame(props: {
+  state: FogOfWarGameData;
+  onEndTurn: () => Promise<void>;
+}): JSX.Element {
   const { state } = props;
   return (
     <>
@@ -11,9 +14,7 @@ export function PlayGame(props: { state: FogOfWarGameData }): JSX.Element {
         players={state.players}
         systems={state.systems.length}
         endedTurn={state.endedTurn}
-        onEndTurn={async () => {
-          // TODO: Implement.
-        }}
+        onEndTurn={props.onEndTurn}
         onResign={async () => {
           // TODO: Implement.
         }}

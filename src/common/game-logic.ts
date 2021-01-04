@@ -2,9 +2,11 @@ import Prando from 'prando';
 import {
   FleetData,
   FogOfWarGameData,
+  GameSettingsData,
   GameStateData,
   HudIndicatorTag,
   OwnerData,
+  PlanetData,
   PlayerStateData,
   SystemData,
 } from './game-state';
@@ -56,27 +58,52 @@ export class FogOfWar {
 }
 
 export class RandomSpawner {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private spawnEmpireFleet(_prando: Prando): FleetData {
+  private randomEmpireFactories(
+    prando: Prando,
+    initialFactories: number,
+  ): number {
+    return prando.nextInt(
+      Math.floor(initialFactories / 4),
+      Math.floor(initialFactories / 2),
+    );
+  }
+
+  private spawnEmpireFleet(prando: Prando): FleetData {
+    // TODO: Make this scale with difficulty, once that's a thing.
+    const ratio = 1;
+    const warships = prando.nextInt(10, 30) * ratio;
     return {
+      // TODO: Determine whether these are applicable for Empire.
       transports: 0,
       troops: 0,
-      warships: 0,
+      warships,
     };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private spawnPlayerFleet(_prando: Prando): FleetData {
+  private spawnPlayerFleet(prando: Prando): FleetData {
+    const warships = prando.nextInt(180, 240);
+    const transports = prando.nextInt(20, 30);
+    const troops = transports * 50;
+    return { transports, troops, warships };
+  }
+
+  spawnPlanet(prando: Prando, owner: OwnerData): PlanetData {
+    // TODO: Make initial generation more fair by giving players a chance to
+    // have a slight advantage in some area (i.e. better planets, more troops,
+    // more ships) without possibly having all of those or none of those.
     return {
-      transports: 0,
-      troops: 0,
-      warships: 0,
+      morale: 1,
+      owner,
+      troops: prando.nextInt(20, 80),
+      // TODO: Weight this, so it's more common to get ~4.
+      recruit: prando.nextInt(1, 10),
     };
   }
 
   spawnInitialSystems(
     prando: Prando,
     systems: number,
+    settings: GameSettingsData,
     players: PlayerStateData[],
   ): SystemData[] {
     const ratio = systems / 26;
@@ -91,12 +118,25 @@ export class RandomSpawner {
     return generator.generateMap(systems, players.length).map((stub) => {
       let owner: OwnerData;
       let orbit: FleetData;
+      let factories: number;
+      let planets: PlanetData[];
       if (stub.home) {
         owner = { player: players.splice(0, 1)[0].userId };
         orbit = this.spawnPlayerFleet(prando);
+        factories = settings.initialFactories;
+        planets = new Array(10)
+          .fill(null)
+          .map(() => this.spawnPlanet(prando, owner));
       } else {
         owner = 'Empire';
         orbit = this.spawnEmpireFleet(prando);
+        factories = this.randomEmpireFactories(
+          prando,
+          settings.initialFactories,
+        );
+        planets = new Array(prando.nextInt(2, 5))
+          .fill(null)
+          .map(() => this.spawnPlanet(prando, owner));
       }
       return {
         name: stub.name,
@@ -104,7 +144,26 @@ export class RandomSpawner {
         owner,
         position: stub.position,
         orbit,
+        factories,
+        planets,
       };
     });
+  }
+}
+
+export class TurnProcessor {
+  nextTurn(state: GameStateData): GameStateData {
+    return {
+      ...state,
+      players: state.players.map((player) => {
+        return {
+          ...player,
+          fogOfWar: {
+            ...player.fogOfWar,
+            endedTurn: player.fogOfWar.serverAgent,
+          },
+        };
+      }),
+    };
   }
 }

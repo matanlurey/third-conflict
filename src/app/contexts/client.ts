@@ -74,6 +74,10 @@ export class LocalGameClient extends GameClient {
   ): Promise<FogOfWarGameData> {
     return this.server.onGamesStart(this.player, { name, seed, systems });
   }
+
+  async gameEndTurn(name: string): Promise<void> {
+    return this.server.onGameEndTurn(this.player, { name });
+  }
 }
 
 export const GameClientContext = React.createContext<GameClient>(

@@ -44,4 +44,9 @@ export abstract class GameClient {
     seed: string,
     systems: number,
   ): Promise<FogOfWarGameData>;
+
+  /**
+   * Ends your turn.
+   */
+  abstract gameEndTurn(name: string): Promise<void>;
 }

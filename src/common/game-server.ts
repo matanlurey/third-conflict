@@ -1,9 +1,15 @@
 import Prando from 'prando';
-import { FogOfWar, RandomSpawner, viewGameStateAs } from './game-logic';
+import {
+  FogOfWar,
+  RandomSpawner,
+  TurnProcessor,
+  viewGameStateAs,
+} from './game-logic';
 import {
   FogOfWarGameData,
   GameListData,
   GameLobbyData,
+  GameSettingsData,
   GameStateData,
   PlayerStateData,
 } from './game-state';
@@ -15,6 +21,7 @@ import { deepClone } from './utils';
 export class GameServer {
   private readonly fogOfWar = new FogOfWar();
   private readonly spawner = new RandomSpawner();
+  private readonly turnProcessor = new TurnProcessor();
 
   constructor(
     protected readonly games: {
@@ -37,7 +44,8 @@ export class GameServer {
     name: string,
     data: T,
   ): Promise<T> {
-    return (this.games[name] = deepClone(data));
+    data = { ...deepClone(data), lastUpdated: this.currentTime() };
+    return (this.games[name] = data);
   }
 
   /**
@@ -47,8 +55,32 @@ export class GameServer {
     delete this.games[name];
   }
 
+  /**
+   * Returns the current timestamp.
+   */
   protected currentTime(): number {
     return new Date().getTime();
+  }
+
+  /**
+   * Maps and replaces the @see PlayerStateData for @param game/@param player.
+   */
+  protected async writePlayer(
+    game: string,
+    player: string,
+    map: (data: PlayerStateData) => PlayerStateData,
+  ): Promise<GameStateData | undefined> {
+    const state = await this.readState(game);
+    if (state && state.kind === 'Game') {
+      for (let i = 0; i < state.players.length; i++) {
+        if (state.players[i].userId === player) {
+          state.players[i] = map(state.players[i]);
+        }
+      }
+      return this.writeState(game, state);
+    }
+    // TODO: Handle this case.
+    return;
   }
 
   /**
@@ -161,9 +193,15 @@ export class GameServer {
         };
       }),
     ];
+    // TODO: Allow customization of these settings.
+    const settings: GameSettingsData = {
+      initialFactories: 10,
+      shipSpeedATurn: 4,
+    };
     const systems = this.spawner.spawnInitialSystems(
       new Prando(request.seed),
       request.systems,
+      settings,
       players,
     );
     const initialState: GameStateData = {
@@ -173,11 +211,7 @@ export class GameServer {
       kind: 'Game',
       players,
       systems,
-      settings: {
-        // TODO: Allow customization of these settings.
-        initialFactories: 10,
-        shipSpeedATurn: 4,
-      },
+      settings,
     };
     const stateWithFogOfWar: GameStateData = {
       ...initialState,
@@ -197,5 +231,32 @@ export class GameServer {
     await this.writeState(request.name, stateWithFogOfWar);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return viewGameStateAs(stateWithFogOfWar, player)!;
+  }
+
+  /**
+   * Processes an "end turn" request.
+   */
+  async onGameEndTurn(
+    player: string,
+    request: { name: string },
+  ): Promise<void> {
+    const result = await this.writePlayer(request.name, player, (data) => {
+      return {
+        ...data,
+        fogOfWar: {
+          ...data.fogOfWar,
+          endedTurn: true,
+        },
+      };
+    });
+    if (result) {
+      const processTurn = result.players.every((p) => p.fogOfWar.endedTurn);
+      if (processTurn) {
+        await this.writeState(
+          request.name,
+          this.turnProcessor.nextTurn(result),
+        );
+      }
+    }
   }
 }

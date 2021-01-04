@@ -180,26 +180,6 @@ export interface FogOfWarGameData {
 export type HudIndicatorTag = 'Self' | 'Empire' | 'Enemy' | undefined;
 
 /**
- * Represents a player's view of @see SystemData.
- */
-export interface FogOfWarSystemData {
-  /**
-   * @see SystemData.name.
-   */
-  readonly name: string;
-
-  /**
-   * @see SystemData.position.
-   */
-  readonly position: PointData;
-
-  /**
-   * @see HudIndicatorTag.
-   */
-  readonly status: HudIndicatorTag;
-}
-
-/**
  * Represents an {X, Y} coordinate pair.
  */
 export type PointData = [number, number];
@@ -262,6 +242,68 @@ export interface SystemData {
    * Orbiting fleet controlled by @member owner.
    */
   readonly orbit: FleetData;
+
+  /**
+   * Number of factories present in the system.
+   */
+  readonly factories: number;
+
+  /**
+   * Planets in the system.
+   */
+  readonly planets: PlanetData[];
+}
+
+/**
+ * Represents a planet in a star system.
+ */
+export interface PlanetData {
+  /**
+   * Troops garrisoned on the planet.
+   */
+  readonly troops: number;
+
+  /**
+   * Number of troops recruited per turn.
+   */
+  readonly recruit: number;
+
+  /**
+   * Morale of the planet.
+   */
+  readonly morale: number;
+
+  /**
+   * Owner of the planet.
+   */
+  readonly owner: OwnerData;
+}
+
+/**
+ * Represents a player's view of @see SystemData.
+ */
+export interface FogOfWarSystemData {
+  /**
+   * @see SystemData.name.
+   */
+  readonly name: string;
+
+  /**
+   * @see SystemData.position.
+   */
+  readonly position: PointData;
+
+  /**
+   * @see HudIndicatorTag.
+   */
+  readonly status: HudIndicatorTag;
+
+  /**
+   * Number of factories present in the system.
+   *
+   * If `undefined`, then it is unknown to the current player.
+   */
+  readonly factories?: number;
 }
 
 /**

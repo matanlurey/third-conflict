@@ -19,11 +19,22 @@ function ViewGameOrLobby(): JSX.Element {
   const [game, setGame] = useState<
     GameListData | FogOfWarGameData | undefined
   >();
+
+  async function pullGameState() {
+    setGame(await client.gamesFetch(params.name));
+  }
+
+  const [gamePollTimer] = useState(() => {
+    return setInterval(pullGameState, 1000);
+  });
+
   useEffect(() => {
-    (async () => {
-      setGame(await client.gamesFetch(params.name));
-    })();
+    pullGameState();
+    return () => {
+      clearInterval(gamePollTimer);
+    };
   }, [client]);
+
   const { goBack } = useHistory();
   if (!game) {
     return (
@@ -45,7 +56,15 @@ function ViewGameOrLobby(): JSX.Element {
       />
     );
   } else {
-    return <PlayGame state={game as FogOfWarGameData} />;
+    return (
+      <PlayGame
+        state={game as FogOfWarGameData}
+        onEndTurn={async () => {
+          // TODO: Make a context object tied to this game.
+          await client.gameEndTurn(game.name);
+        }}
+      />
+    );
   }
 }
 
