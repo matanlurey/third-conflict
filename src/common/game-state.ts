@@ -78,6 +78,11 @@ export interface GameStateData {
   readonly createdBy: string;
 
   /**
+   * Current turn number.
+   */
+  readonly currentTurn: number;
+
+  /**
    * Players in the game.
    */
   readonly players: PlayerStateData[];
@@ -157,6 +162,11 @@ export interface FogOfWarGameData {
    * @see GameStateData.players.
    */
   readonly players: number;
+
+  /**
+   * @see GameStateData.currentTurn.
+   */
+  readonly currentTurn: number;
 
   /**
    * Whether this player is a server-driven agent, and does not end their turn.

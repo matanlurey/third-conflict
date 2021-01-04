@@ -1,5 +1,5 @@
 import { Button } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './Header.scss';
 
 export interface GameHeaderProps {
@@ -10,10 +10,18 @@ export interface GameHeaderProps {
 
   onEndTurn: () => Promise<void>;
   onResign: () => Promise<void>;
+  onReports: () => void;
 }
 
 export function GameHeader(props: GameHeaderProps): JSX.Element {
   const [pendingPromise, setPendingPromise] = useState(false);
+  const [disableEndTurn, setDisableEndTurn] = useState<number>();
+  const waitingForPlayers = props.endedTurn || pendingPromise;
+  useEffect(() => {
+    return () => {
+      clearTimeout(disableEndTurn);
+    };
+  }, []);
   return (
     <header className="game-header">
       <div>
@@ -26,15 +34,21 @@ export function GameHeader(props: GameHeaderProps): JSX.Element {
         <li>
           <Button
             type="primary"
-            disabled={props.endedTurn || pendingPromise}
+            disabled={waitingForPlayers}
             onClick={async () => {
               setPendingPromise(true);
               await props.onEndTurn();
-              setPendingPromise(false);
+              const handle = setTimeout(() => {
+                setPendingPromise(false);
+              }, 2000);
+              setDisableEndTurn((handle as unknown) as number);
             }}
           >
-            End Turn
+            {waitingForPlayers ? 'Waiting...' : 'End Turn'}
           </Button>
+        </li>
+        <li>
+          <Button onClick={props.onReports}>Reports</Button>
         </li>
         <li>
           <Button

@@ -17,11 +17,12 @@ TBD.
   - WarShips
   - Transports (w/ Troops)
 - [x] Add end turn logic.
-- [ ] Poll for next turn.
-- [ ] Add end turn reporting.
+- [x] Poll for next turn.
+- [x] Add end turn reporting.
 - [ ] Add fleet movement:
   - F2F
   - Combat.
+- [ ] Update reporting to actually show content.
 - [ ] Home: Show latest N games.
 - [ ] Add "resign".
 - [ ] Logo: "Push" notification symbol/bubble.

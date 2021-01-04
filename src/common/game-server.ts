@@ -198,6 +198,7 @@ export class GameServer {
       initialFactories: 10,
       shipSpeedATurn: 4,
     };
+    // TODO: Move all this logic into a logic class.
     const systems = this.spawner.spawnInitialSystems(
       new Prando(request.seed),
       request.systems,
@@ -208,6 +209,7 @@ export class GameServer {
       name: pending.name,
       lastUpdated: this.currentTime(),
       createdBy: player,
+      currentTurn: 1,
       kind: 'Game',
       players,
       systems,
@@ -227,7 +229,6 @@ export class GameServer {
         };
       }),
     };
-    console.log(stateWithFogOfWar);
     await this.writeState(request.name, stateWithFogOfWar);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return viewGameStateAs(stateWithFogOfWar, player)!;

@@ -33,6 +33,7 @@ export class FogOfWar {
   ): FogOfWarGameData {
     return {
       kind: 'Game',
+      currentTurn: state.currentTurn,
       name: state.name,
       players: state.players.length,
       endedTurn: serverAgent,
@@ -155,11 +156,13 @@ export class TurnProcessor {
   nextTurn(state: GameStateData): GameStateData {
     return {
       ...state,
+      currentTurn: state.currentTurn + 1,
       players: state.players.map((player) => {
         return {
           ...player,
           fogOfWar: {
             ...player.fogOfWar,
+            currentTurn: player.fogOfWar.currentTurn + 1,
             endedTurn: player.fogOfWar.serverAgent,
           },
         };
