@@ -7,6 +7,7 @@ import {
   GameLobbyData,
 } from '../../common/game-state';
 import { GameClientContext } from '../contexts/client';
+import { GameContext } from '../contexts/game';
 import './Games.scss';
 import { CreateGames } from './Games/Create';
 import { ListGames } from './Games/List';
@@ -57,16 +58,17 @@ function ViewGameOrLobby(): JSX.Element {
     );
   } else {
     return (
-      <PlayGame
-        state={game as FogOfWarGameData}
-        onResign={async () => {
-          await client.gameResign(game.name);
-        }}
-        onEndTurn={async () => {
-          // TODO: Make a context object tied to this game.
-          await client.gameEndTurn(game.name);
-        }}
-      />
+      <GameContext.Provider value={game as FogOfWarGameData}>
+        <PlayGame
+          onResign={async () => {
+            await client.gameResign(game.name);
+          }}
+          onEndTurn={async () => {
+            // TODO: Make a context object tied to this game.
+            await client.gameEndTurn(game.name);
+          }}
+        />
+      </GameContext.Provider>
     );
   }
 }

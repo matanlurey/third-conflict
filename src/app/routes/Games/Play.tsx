@@ -1,17 +1,19 @@
 import { Tabs } from 'antd';
-import React from 'react';
+import React, { useContext } from 'react';
 import { useHistory, useRouteMatch } from 'react-router-dom';
-import { FogOfWarGameData } from '../../../common/game-state';
+import { GameContext } from '../../contexts/game';
 import { GameHeader } from '../../ui/Header';
 import { MapPreview } from '../../ui/Map';
 import { SystemsTab } from './Play/Systems';
 
 export function PlayGame(props: {
-  state: FogOfWarGameData;
   onEndTurn: () => Promise<void>;
   onResign: () => Promise<void>;
 }): JSX.Element {
-  const { state } = props;
+  const state = useContext(GameContext);
+  if (!state) {
+    throw new Error(`No GameContext provided.`);
+  }
   const route = useRouteMatch<{ name: string; tab: string }>(
     '/games/:name/:tab?',
   )?.params;
@@ -29,7 +31,7 @@ export function PlayGame(props: {
       <Tabs
         activeKey={route?.tab || ''}
         onTabClick={(newTab) => {
-          if (route && route?.tab !== newTab) {
+          if (route) {
             history.replace(`/games/${route.name}/${newTab}`);
           }
         }}
@@ -38,13 +40,15 @@ export function PlayGame(props: {
           <MapPreview
             systems={state.systems}
             onSelect={(system) => {
-              history.push(`/games/${route?.name}/systems/${system.name}`);
+              history.push(
+                `/games/${route?.name}/systems/${system.name.toLowerCase()}`,
+              );
             }}
           />
         </Tabs.TabPane>
         <Tabs.TabPane tab="Reports" key="reports" disabled={true} />
         <Tabs.TabPane tab="Systems" key="systems">
-          <SystemsTab gameName={state.name} systems={state.systems} />
+          <SystemsTab />
         </Tabs.TabPane>
         <Tabs.TabPane tab="Fleets" key="fleets" disabled={true} />
       </Tabs>

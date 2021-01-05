@@ -1,7 +1,8 @@
-import { Descriptions, Table } from 'antd';
-import React from 'react';
+import { Button, Descriptions, Space, Table } from 'antd';
+import React, { useContext } from 'react';
 import { Link, Route, Switch } from 'react-router-dom';
 import { FogOfWarSystemData } from '../../../../common/game-state';
+import { GameContext } from '../../../contexts/game';
 
 interface RenderSystemRow {
   readonly name: string;
@@ -22,6 +23,9 @@ function ViewSystem(props: { system: FogOfWarSystemData }): JSX.Element {
   // TODO: Consider adding a smaller preview of the system on the map?
   return (
     <>
+      <Space style={{ float: 'right', paddingTop: '5px' }}>
+        <Button disabled>Launch Fleet</Button>
+      </Space>
       <h2>{system.name}</h2>
       <Descriptions title="Survey" bordered>
         <Descriptions.Item label="Position">
@@ -40,10 +44,9 @@ function ViewSystem(props: { system: FogOfWarSystemData }): JSX.Element {
   );
 }
 
-export function SystemsTab(props: {
-  gameName: string;
-  systems: FogOfWarSystemData[];
-}): JSX.Element {
+export function SystemsTab(): JSX.Element {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const game = useContext(GameContext)!;
   return (
     <>
       <Switch>
@@ -53,8 +56,8 @@ export function SystemsTab(props: {
           render={(routeProps) => {
             const name = routeProps.match.params['system'] as string;
             let system!: FogOfWarSystemData;
-            for (const s of props.systems) {
-              if (s.name === name) {
+            for (const s of game.systems) {
+              if (s.name.toLowerCase() === name) {
                 system = s;
                 break;
               }
@@ -72,7 +75,9 @@ export function SystemsTab(props: {
                 sorter: (a, b) => (a.name > b.name ? 1 : -1),
                 defaultSortOrder: 'ascend',
                 render: (name) => (
-                  <Link to={`/games/${props.gameName}/systems/${name}`}>
+                  <Link
+                    to={`/games/${game.name}/systems/${name.toLowerCase()}`}
+                  >
                     {name}
                   </Link>
                 ),
@@ -83,7 +88,7 @@ export function SystemsTab(props: {
                 key: 'status',
               },
             ]}
-            dataSource={props.systems.map(renderSystem)}
+            dataSource={game.systems.map(renderSystem)}
             pagination={false}
           />
         </Route>

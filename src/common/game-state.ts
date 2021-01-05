@@ -335,3 +335,30 @@ export interface FleetData {
    */
   readonly troops: number;
 }
+
+export interface TransitFleetData {
+  /**
+   * Which units are included in the fleet.
+   */
+  readonly fleet: FleetData;
+
+  /**
+   * Controlling player.
+   */
+  readonly owner: OwnerData;
+
+  /**
+   * Source system (by name).
+   */
+  readonly source: string;
+
+  /**
+   * Destination system (by name).
+   */
+  readonly destination: string;
+
+  /**
+   * Number of turns moved.
+   */
+  readonly movement: number;
+}

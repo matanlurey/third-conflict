@@ -19,7 +19,7 @@ TBD.
 - [x] Add end turn logic.
 - [x] Poll for next turn.
 - [x] Add end turn reporting.
-- [ ] Add systems pane
+- [x] Add systems pane
 - [ ] Add fleets pane
 - [ ] Add fleet movement:
   - F2F
