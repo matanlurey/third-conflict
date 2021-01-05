@@ -294,4 +294,22 @@ export class GameServer {
       }
     }
   }
+
+  async onGameScout(
+    player: string,
+    request: { game: string; target: string },
+  ): Promise<
+    | {
+        type: 'Warship';
+        origin: string;
+        eta: number;
+      }
+    | { error: string }
+  > {
+    const game = await this.readState(request.game);
+    if (!game) {
+      return { error: `No game ${request.game} found` };
+    }
+    throw 'TODO';
+  }
 }
