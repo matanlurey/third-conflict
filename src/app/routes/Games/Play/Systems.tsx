@@ -1,8 +1,10 @@
-import { Button, Card, Descriptions, List, Space, Table } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
+import { Badge, Button, Card, Descriptions, List, Space, Table } from 'antd';
 import React, { useContext } from 'react';
 import { Link, Route, Switch } from 'react-router-dom';
 import { FogOfWarSystemData } from '../../../../common/game-state';
 import { GameContext, SystemContext } from '../../../contexts/game';
+import { AsyncButton } from '../../../ui/AsyncButton';
 import './Systems.scss';
 
 interface RenderSystemRow {
@@ -21,13 +23,7 @@ function renderSystem(input: FogOfWarSystemData): RenderSystemRow {
 
 function ViewSystem(): JSX.Element {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const game = useContext(GameContext)!;
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const system = useContext(SystemContext)!;
-  const canReinforce =
-    game.systems.filter((x) => {
-      return x.status === 'Self';
-    }).length > 1;
   // TODO: Consider adding a smaller preview of the system on the map?
   return (
     <>
@@ -35,13 +31,22 @@ function ViewSystem(): JSX.Element {
         {system.status === 'Self' && (
           <>
             <Button type="dashed">Launch Fleet</Button>
-            <Button type="dashed" disabled={!canReinforce}>
-              Reinforce System
-            </Button>
           </>
         )}
         {system.status !== 'Self' && (
-          <Button type="dashed">Attack System</Button>
+          <>
+            <Button type="dashed" disabled>
+              Attack
+            </Button>
+            <AsyncButton
+              type="dashed"
+              onClick={async () => {
+                // Intentionally left blank.
+              }}
+            >
+              Scout
+            </AsyncButton>
+          </>
         )}
       </Space>
       <h2>{system.name}</h2>
@@ -51,22 +56,22 @@ function ViewSystem(): JSX.Element {
         size="small"
         column={2}
         layout="vertical"
-        style={{ marginBottom: '5px' }}
+        style={{ marginBottom: '10px' }}
       >
         <Descriptions.Item label="Factories">
           {system.factories || '?'}
         </Descriptions.Item>
         <Descriptions.Item label="Warships">
-          {system.fleet.warships || '?'}
+          {system.orbit.warships || '?'}
         </Descriptions.Item>
         <Descriptions.Item label="Transports">
-          {system.fleet.transports || '?'}
+          {system.orbit.transports || '?'}
         </Descriptions.Item>
         <Descriptions.Item label="Troops">
-          {system.fleet.troops || '?'}
+          {system.orbit.troops || '?'}
         </Descriptions.Item>
       </Descriptions>
-      <h3>Planets</h3>
+      <Descriptions title="Planets" extra={<>Morale, Troops, Recruitment.</>} />
       {!system.planets && <p>No information available.</p>}
       {system.planets && (
         <List
@@ -76,9 +81,16 @@ function ViewSystem(): JSX.Element {
           renderItem={(item) => (
             <List.Item>
               <Card>
-                <img src={`/images/planets/${item.recruit}.png`} />
+                <Badge count={1} style={{ backgroundColor: 'grey' }}>
+                  <img src={`/images/planets/${item.recruit}.png`} />
+                </Badge>
                 <br />
-                {item.troops} Troops
+                <div className="troops">
+                  <div>{item.troops}</div>
+                  <div className="recruit">
+                    <PlusOutlined /> {item.recruit}
+                  </div>
+                </div>
               </Card>
             </List.Item>
           )}

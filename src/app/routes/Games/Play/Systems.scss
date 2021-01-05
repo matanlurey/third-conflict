@@ -10,6 +10,33 @@
       width: 40px;
     }
 
-    padding: 8px;
+    .ant-badge {
+      margin-top: 8px;
+    }
+
+    padding: 8px 16px;
+  }
+
+  .troops {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+
+    > div {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-around;
+
+      &.recruit {
+        color: greenyellow;
+        &::before {
+          content: '(';
+        }
+        &::after {
+          content: ')';
+        }
+      }
+    }
   }
 }

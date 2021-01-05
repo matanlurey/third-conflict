@@ -1,7 +1,9 @@
 import Prando from 'prando';
+import { v4 } from 'uuid';
 import {
   FleetData,
   FogOfWarGameData,
+  FogOfWarSystemData,
   GameSettingsData,
   GameStateData,
   HudIndicatorTag,
@@ -29,30 +31,46 @@ export class FogOfWar {
   createInitialFogOfWar(
     state: GameStateData,
     serverAgent: boolean,
-    player: string,
+    playerId: string,
   ): FogOfWarGameData {
+    let player!: PlayerStateData;
+    for (const p of state.players) {
+      if (p.userId === playerId) {
+        player = p;
+        break;
+      }
+    }
     return {
       kind: 'Game',
       currentTurn: state.currentTurn,
       name: state.name,
       players: state.players.length,
       endedTurn: serverAgent,
+      fleets: [],
       systems: state.systems.map((system) => {
-        const status = this.determineStatus(system, player);
-        const friendly = status === 'Self';
-        return {
-          name: system.name,
-          position: system.position,
-          status,
-          factories: friendly ? system.factories : undefined,
-          planets: friendly ? system.planets : undefined,
-          fleet: friendly
-            ? {
-                ...system.orbit,
-              }
-            : {},
-        };
+        return this.revealSystem(system, player);
       }),
+    };
+  }
+
+  // TODO: Add an option to reveal a non-friendly system.
+  revealSystem(input: SystemData, player: PlayerStateData): FogOfWarSystemData {
+    const status = this.determineStatus(input, player.userId);
+    let fleet: Partial<FleetData> = {};
+    let factories: number | undefined;
+    let planets: PlanetData[] | undefined;
+    if (status === 'Self') {
+      fleet = input.orbit;
+      factories = input.factories;
+      planets = input.planets;
+    }
+    return {
+      name: input.name,
+      position: input.position,
+      status,
+      orbit: fleet,
+      factories,
+      planets,
     };
   }
 
@@ -101,6 +119,7 @@ export class RandomSpawner {
     // have a slight advantage in some area (i.e. better planets, more troops,
     // more ships) without possibly having all of those or none of those.
     return {
+      guid: v4(),
       morale: 1,
       owner,
       troops: prando.nextInt(20, 80),

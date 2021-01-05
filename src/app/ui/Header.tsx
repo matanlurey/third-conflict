@@ -1,5 +1,4 @@
-import { Button } from 'antd';
-import { useEffect, useState } from 'react';
+import { AsyncButton } from './AsyncButton';
 import './Header.scss';
 
 export interface GameHeaderProps {
@@ -13,14 +12,7 @@ export interface GameHeaderProps {
 }
 
 export function GameHeader(props: GameHeaderProps): JSX.Element {
-  const [pendingPromise, setPendingPromise] = useState(false);
-  const [disableEndTurn, setDisableEndTurn] = useState<number>();
-  const waitingForPlayers = props.endedTurn || pendingPromise;
-  useEffect(() => {
-    return () => {
-      clearTimeout(disableEndTurn);
-    };
-  }, []);
+  const waitingForPlayers = props.endedTurn;
   return (
     <header className="game-header">
       <div>
@@ -31,23 +23,16 @@ export function GameHeader(props: GameHeaderProps): JSX.Element {
       </div>
       <ul>
         <li>
-          <Button
+          <AsyncButton
             type="primary"
             disabled={waitingForPlayers}
-            onClick={async () => {
-              setPendingPromise(true);
-              await props.onEndTurn();
-              const handle = setTimeout(() => {
-                setPendingPromise(false);
-              }, 2000);
-              setDisableEndTurn((handle as unknown) as number);
-            }}
+            onClick={props.onEndTurn}
           >
             {waitingForPlayers ? 'Waiting...' : 'End Turn'}
-          </Button>
+          </AsyncButton>
         </li>
         <li>
-          <Button
+          <AsyncButton
             danger
             onClick={async () => {
               if (
@@ -57,13 +42,11 @@ export function GameHeader(props: GameHeaderProps): JSX.Element {
               ) {
                 return;
               }
-              setPendingPromise(true);
-              await props.onResign();
-              setPendingPromise(false);
+              return props.onResign();
             }}
           >
             Resign
-          </Button>
+          </AsyncButton>
         </li>
       </ul>
     </header>

@@ -4,6 +4,7 @@ import { useHistory, useRouteMatch } from 'react-router-dom';
 import { GameContext } from '../../contexts/game';
 import { GameHeader } from '../../ui/Header';
 import { MapPreview } from '../../ui/Map';
+import { FleetsTab } from './Play/Fleets';
 import { SystemsTab } from './Play/Systems';
 
 export function PlayGame(props: {
@@ -50,7 +51,9 @@ export function PlayGame(props: {
         <Tabs.TabPane tab="Systems" key="systems">
           <SystemsTab />
         </Tabs.TabPane>
-        <Tabs.TabPane tab="Fleets" key="fleets" disabled={true} />
+        <Tabs.TabPane tab="Fleets" key="fleets">
+          <FleetsTab />
+        </Tabs.TabPane>
       </Tabs>
     </>
   );

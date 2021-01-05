@@ -218,6 +218,7 @@ export class GameServer {
       currentTurn: 1,
       kind: 'Game',
       players,
+      fleets: [],
       systems,
       settings,
     };

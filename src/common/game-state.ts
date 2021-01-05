@@ -93,6 +93,11 @@ export interface GameStateData {
   readonly systems: SystemData[];
 
   /**
+   * Fleets in the game.
+   */
+  readonly fleets: TransitFleetData[];
+
+  /**
    * Type of game saved data.
    */
   readonly kind: 'Game';
@@ -177,6 +182,11 @@ export interface FogOfWarGameData {
    * Whether player ended their turn.
    */
   readonly endedTurn: boolean;
+
+  /**
+   * Fleets belonging to the current player; @see GameStateData.fleets.
+   */
+  readonly fleets: TransitFleetData[];
 
   /**
    * @see GameStateData.systems.
@@ -269,6 +279,11 @@ export interface SystemData {
  */
 export interface PlanetData {
   /**
+   * Unique ID.
+   */
+  readonly guid: string;
+
+  /**
    * Troops garrisoned on the planet.
    */
   readonly troops: number;
@@ -318,7 +333,7 @@ export interface FogOfWarSystemData {
   /**
    * Fleet information that is disclosed, if anything.
    */
-  readonly fleet: Partial<FleetData>;
+  readonly orbit: Partial<FleetData>;
 
   /**
    * @see GameStateData.planets.
@@ -348,6 +363,16 @@ export interface FleetData {
 
 export interface TransitFleetData {
   /**
+   * Unique ID.
+   */
+  readonly guid: string;
+
+  /**
+   * Type of movement.
+   */
+  readonly mission: 'Scout' | 'Transfer' | 'Conquest';
+
+  /**
    * Which units are included in the fleet.
    */
   readonly fleet: FleetData;
@@ -371,4 +396,38 @@ export interface TransitFleetData {
    * Number of turns moved.
    */
   readonly movement: number;
+}
+
+export class TransitFleet {
+  constructor(readonly data: TransitFleetData) {}
+
+  computeEtaInTurns(game: GameStateData | FogOfWarGameData): number {
+    let source: SystemData | FogOfWarSystemData | undefined;
+    let target: SystemData | FogOfWarSystemData | undefined;
+    for (const s of game.systems) {
+      if (s.name === this.data.source) {
+        source = s;
+        continue;
+      }
+      if (s.name === this.data.destination) {
+        target = s;
+        continue;
+      }
+    }
+    if (!source || !target) {
+      throw new Error(`Unexpected fleet data: ${this.data}`);
+    }
+    // TODO: Take a settings object instead.
+    const perTurn = 4;
+    const distance = new Point(source.position).distance(
+      new Point(target.position),
+    );
+    const movedSoFar = this.data.movement * perTurn;
+    const stillNeeded = distance - movedSoFar;
+    if (stillNeeded <= 1) {
+      return 1;
+    } else {
+      return stillNeeded / perTurn;
+    }
+  }
 }
