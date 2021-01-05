@@ -38,10 +38,19 @@ export class FogOfWar {
       players: state.players.length,
       endedTurn: serverAgent,
       systems: state.systems.map((system) => {
+        const status = this.determineStatus(system, player);
+        const friendly = status === 'Self';
         return {
           name: system.name,
           position: system.position,
-          status: this.determineStatus(system, player),
+          status,
+          factories: friendly ? system.factories : undefined,
+          planets: friendly ? system.planets : undefined,
+          fleet: friendly
+            ? {
+                ...system.orbit,
+              }
+            : {},
         };
       }),
     };

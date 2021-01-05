@@ -1,0 +1,15 @@
+.planet-grid {
+  .ant-card-body {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    font-size: x-small;
+
+    img {
+      height: 40px;
+      width: 40px;
+    }
+
+    padding: 8px;
+  }
+}

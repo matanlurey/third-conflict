@@ -314,6 +314,16 @@ export interface FogOfWarSystemData {
    * If `undefined`, then it is unknown to the current player.
    */
   readonly factories?: number;
+
+  /**
+   * Fleet information that is disclosed, if anything.
+   */
+  readonly fleet: Partial<FleetData>;
+
+  /**
+   * @see GameStateData.planets.
+   */
+  readonly planets?: Partial<PlanetData>[];
 }
 
 /**
