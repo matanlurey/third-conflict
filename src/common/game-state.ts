@@ -134,11 +134,6 @@ export interface GameSettingsData {
  */
 export interface PlayerStateData {
   /**
-   * Name of the player.
-   */
-  readonly name: string;
-
-  /**
    * User ID of the player (guaranteed unique).
    */
   readonly userId: string;
