@@ -6,7 +6,7 @@ TBD.
 
 ## TODO
 
-### Framework
+- [ ] Rewrite `State` layer.
 
 - [x] Basic UI Scaffold.
 - [x] Add proxy server API, including local game mode.
