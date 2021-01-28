@@ -540,3 +540,58 @@ export interface PlanetReference extends ReferenceKind {
   kind: 'Planet';
   guid: string;
 }
+
+/**
+ * Represents a partial view of a @see SystemState, i.e. for fog of war.
+ */
+export interface PartialSystemState {
+  /**
+   * Position of the system within the sector.
+   */
+  position: PointState;
+
+  /**
+   * Name of the system.
+   */
+  name: string;
+
+  /**
+   * Whether this is @member owner's home system.
+   */
+  home: boolean;
+
+  /**
+   * Owning player, or "'Empire'" if not controlled by a player.
+   *
+   * If undefined it is not known.
+   */
+  owner?: PlayerReference | 'Empire';
+
+  /**
+   * Orbiting fleet controlled by @member owner.
+   */
+  orbit: Partial<FleetState>;
+
+  /**
+   * Number of factories present in the system.
+   *
+   * If undefined it is not known.
+   */
+  factories?: number;
+
+  /**
+   * Planets in the system.
+   */
+  planets: Partial<PlanetState>[];
+}
+
+export class PartialSystem extends Entity<PartialSystemState, PartialSystem> {
+  /**
+   * Position of the system within the sector.
+   */
+  get position(): Point {
+    return new Point(this.state.position);
+  }
+
+  // FIXME: Complete the rest of the getters.
+}
