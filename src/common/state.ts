@@ -20,6 +20,26 @@ export abstract class Entity<TState, TEntity extends Entity<TState, TEntity>> {
   }
 }
 
+/**
+ * Base state properties for reference to an @see Entity.
+ */
+export interface ReferenceKind {
+  /**
+   * Discriminator.
+   */
+  kind: 'Fleet' | 'Game' | 'Lobby' | 'Planet' | 'Player' | 'System';
+}
+
+/**
+ * References to known entity types.
+ */
+export type Reference =
+  | GameReference
+  | LobbyReference
+  | PlanetReference
+  | PlayerReference
+  | SystemReference;
+
 export interface PlayerState {
   /**
    * Unique name of the player.
@@ -48,6 +68,11 @@ export class Player extends Entity<PlayerState, Player> {
   }
 }
 
+export interface PlayerReference extends ReferenceKind {
+  kind: 'Player';
+  name: string;
+}
+
 export interface LobbyState {
   /**
    * Name of the game.
@@ -62,7 +87,7 @@ export interface LobbyState {
   /**
    * Which player created the lobby.
    */
-  createdBy: string;
+  createdBy: PlayerReference;
 
   /**
    * When the lobby was last updated.
@@ -93,7 +118,7 @@ export class Lobby extends Entity<LobbyState, Lobby> {
   /**
    * Which player created the lobby.
    */
-  get createdBy(): string {
+  get createdBy(): PlayerReference {
     return this.state.createdBy;
   }
 
@@ -112,6 +137,11 @@ export class Lobby extends Entity<LobbyState, Lobby> {
   }
 }
 
+export interface LobbyReference extends ReferenceKind {
+  kind: 'Lobby';
+  name: string;
+}
+
 export interface GameState {
   /**
    * Name of the game.
@@ -121,7 +151,7 @@ export interface GameState {
   /**
    * Which player created the game.
    */
-  createdBy: string;
+  createdBy: PlayerReference;
 
   /**
    * When the lobby was last updated.
@@ -142,6 +172,11 @@ export interface GameState {
    * Players in the game.
    */
   players: PlayerState[];
+
+  /**
+   * Systems in the game.
+   */
+  systems: SystemState[];
 }
 
 export class Game extends Entity<GameState, Game> {
@@ -155,7 +190,7 @@ export class Game extends Entity<GameState, Game> {
   /**
    * Which player created the game.
    */
-  get createdBy(): string {
+  get createdBy(): PlayerReference {
     return this.state.createdBy;
   }
 
@@ -173,6 +208,9 @@ export class Game extends Entity<GameState, Game> {
     return this.state.currentTurn;
   }
 
+  /**
+   * Configured settings.
+   */
   get settings(): Settings {
     return new Settings(this.state.settings);
   }
@@ -183,6 +221,18 @@ export class Game extends Entity<GameState, Game> {
   get players(): Player[] {
     return this.state.players.map((p) => new Player(p));
   }
+
+  /**
+   * Systems in the game.
+   */
+  get systems(): System[] {
+    return this.state.systems.map((s) => new System(s));
+  }
+}
+
+export interface GameReference extends ReferenceKind {
+  kind: 'Game';
+  name: string;
 }
 
 export interface SettingsState {
@@ -201,6 +251,46 @@ export interface SettingsState {
    * The faster the speed the farther ships can make it every "tick" of the game.
    */
   shipSpeedATurn: number;
+}
+
+export interface GameListingState {
+  /**
+   * Reference to the game (or lobby).
+   */
+  reference: LobbyReference | GameReference;
+
+  /**
+   * Number of players in the game, or the max number of players if a lobby.
+   */
+  players: number;
+
+  /**
+   * Last updated timestamp.
+   */
+  lastUpdated: number;
+}
+
+export class GameListing extends Entity<GameListingState, GameListing> {
+  /**
+   * Reference to the game (or lobby).
+   */
+  get reference(): LobbyReference | GameReference {
+    return this.state.reference;
+  }
+
+  /**
+   * Number of players in the game, or the max number of players if a lobby.
+   */
+  get players(): number {
+    return this.state.players;
+  }
+
+  /**
+   * Last updated timestamp.
+   */
+  get lastUpdated(): number {
+    return this.state.lastUpdated;
+  }
 }
 
 export class Settings extends Entity<SettingsState, Settings> {
@@ -223,4 +313,230 @@ export class Settings extends Entity<SettingsState, Settings> {
   get shipSpeedATurn(): number {
     return this.state.shipSpeedATurn;
   }
+}
+
+/**
+ * Represents an `{X, Y}` coordinate pair.
+ */
+export type PointState = [number, number];
+
+export class Point extends Entity<PointState, Point> {
+  /**
+   * X-coordinate.
+   */
+  get x(): number {
+    return this.state[0];
+  }
+
+  /**
+   * Y-coordinate.
+   */
+  get y(): number {
+    return this.state[1];
+  }
+}
+
+/**
+ * Represents a star system.
+ */
+export interface SystemState {
+  /**
+   * Position of the system within the sector.
+   */
+  position: PointState;
+
+  /**
+   * Name of the system.
+   */
+  name: string;
+
+  /**
+   * Whether this is @member owner's home system.
+   */
+  home: boolean;
+
+  /**
+   * Owning player, or "'Empire'" if not controlled by a player.
+   */
+  owner: PlayerReference | 'Empire';
+
+  /**
+   * Orbiting fleet controlled by @member owner.
+   */
+  orbit: FleetState;
+
+  /**
+   * Number of factories present in the system.
+   */
+  factories: number;
+
+  /**
+   * Planets in the system.
+   */
+  planets: PlanetState[];
+}
+
+export interface SystemReference extends ReferenceKind {
+  kind: 'System';
+  name: string;
+}
+
+export class System extends Entity<SystemState, System> {
+  /**
+   * Position of the system within the sector.
+   */
+  get position(): Point {
+    return new Point(this.state.position);
+  }
+
+  /**
+   * Name of the system.
+   */
+  get name(): string {
+    return this.state.name;
+  }
+
+  /**
+   * Whether this is @member owner's home system.
+   */
+  get home(): boolean {
+    return this.state.home;
+  }
+
+  /**
+   * Owning player, or "'Empire'" if not controlled by a player.
+   */
+  get owner(): PlayerReference | 'Empire' {
+    return this.state.owner;
+  }
+
+  /**
+   * Orbiting fleet controlled by @member owner.
+   */
+  get orbit(): Fleet {
+    return new Fleet(this.state.orbit);
+  }
+
+  /**
+   * Number of factories present in the system.
+   */
+  get factories(): number {
+    return this.state.factories;
+  }
+
+  /**
+   * Planets in the system.
+   */
+  get planets(): Planet[] {
+    return this.state.planets.map((p) => new Planet(p));
+  }
+}
+
+export interface FleetState {
+  /**
+   * WarShips that are part of this fleet.
+   */
+  warships: number;
+
+  /**
+   * Transports that are part of this fleet.
+   */
+  transports: number;
+
+  /**
+   * Troops that are on board @member transports.
+   */
+  troops: number;
+}
+
+export class Fleet extends Entity<FleetState, Fleet> {
+  /**
+   * WarShips that are part of this fleet.
+   */
+  get warships(): number {
+    return this.state.warships;
+  }
+
+  /**
+   * Transports that are part of this fleet.
+   */
+  get transports(): number {
+    return this.state.transports;
+  }
+
+  /**
+   * Troops that are on board @member transports.
+   */
+  get troops(): number {
+    return this.state.troops;
+  }
+}
+
+export interface PlanetState {
+  /**
+   * Unique ID.
+   */
+  guid: string;
+
+  /**
+   * Troops garrisoned on the planet.
+   */
+  troops: number;
+
+  /**
+   * Number of troops recruited per turn.
+   */
+  recruit: number;
+
+  /**
+   * Morale of the planet.
+   */
+  morale: number;
+
+  /**
+   * Owner of the planet.
+   */
+  owner: PlayerReference | 'Empire';
+}
+
+export class Planet extends Entity<PlanetState, Planet> {
+  /**
+   * Unique ID.
+   */
+  get guid(): string {
+    return this.state.guid;
+  }
+
+  /**
+   * Troops garrisoned on the planet.
+   */
+  get troops(): number {
+    return this.state.troops;
+  }
+
+  /**
+   * Number of troops recruited per turn.
+   */
+  get recruit(): number {
+    return this.state.recruit;
+  }
+
+  /**
+   * Morale of the planet.
+   */
+  get morale(): number {
+    return this.state.morale;
+  }
+
+  /**
+   * Owner of the planet.
+   */
+  get owner(): PlayerReference | 'Empire' {
+    return this.state.owner;
+  }
+}
+
+export interface PlanetReference extends ReferenceKind {
+  kind: 'Planet';
+  guid: string;
 }
