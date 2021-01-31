@@ -1,8 +1,13 @@
 import React from 'react';
 import { GameClient } from '../../common/game-client';
 import { GameServer } from '../../common/game-server';
-import { GameLobbyData, GameStateData } from '../../common/game-state';
-import { GameListing, Lobby, PartialGame } from '../../common/state';
+import {
+  GameListing,
+  GameState,
+  Lobby,
+  LobbyState,
+  PartialGame,
+} from '../../common/state';
 
 export class LocalGameServer extends GameServer {
   constructor(private readonly storage = localStorage) {
@@ -14,7 +19,7 @@ export class LocalGameServer extends GameServer {
     );
   }
 
-  protected async writeState<T extends GameLobbyData | GameStateData>(
+  protected async writeState<T extends LobbyState | GameState>(
     name: string,
     data: T,
   ): Promise<T> {
@@ -47,12 +52,24 @@ export class LocalGameClient extends GameClient {
 
   async gamesFetch(
     name: string,
-  ): Promise<PartialGame | GameListing | undefined> {
-    return this.server.onGamesFetch(this.player, name);
+  ): Promise<PartialGame | Lobby | GameListing | undefined> {
+    const state = await this.server.onGamesFetch(this.player, name);
+    if (!state) {
+      return;
+    }
+    switch (state?.kind) {
+      case 'Game':
+        return new PartialGame(state);
+      case 'Lobby':
+        return new Lobby(state);
+      default:
+        return new GameListing(state);
+    }
   }
 
   async gamesList(): Promise<GameListing[]> {
-    return this.server.onGamesList();
+    const state = await this.server.onGamesList();
+    return state.map((s) => new GameListing(s));
   }
 
   async gamesDelete(name: string): Promise<void> {
@@ -60,7 +77,11 @@ export class LocalGameClient extends GameClient {
   }
 
   async gamesCreate(name: string, players: number): Promise<Lobby> {
-    return this.server.onGamesCreate(this.player, { name, players });
+    const state = await this.server.onGamesCreate(this.player, {
+      name,
+      players,
+    });
+    return new Lobby(state);
   }
 
   async gamesStart(
@@ -68,7 +89,12 @@ export class LocalGameClient extends GameClient {
     seed: string,
     systems: number,
   ): Promise<PartialGame> {
-    return this.server.onGamesStart(this.player, { name, seed, systems });
+    const state = await this.server.onGamesStart(this.player, {
+      name,
+      seed,
+      systems,
+    });
+    return new PartialGame(state);
   }
 
   async gameEndTurn(name: string): Promise<void> {

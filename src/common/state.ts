@@ -249,6 +249,19 @@ export class Game extends Entity<GameState, Game> {
   get systems(): System[] {
     return this.state.systems.map((s) => new System(s));
   }
+
+  /**
+   * Returns the fog of war game state for the provided player name.
+   *
+   * @param asPlayerName
+   */
+  fogOfWar(asPlayerName: string): PartialGame {
+    const result = this.state.fogOfWar[asPlayerName];
+    if (!result) {
+      throw new Error(`"${asPlayerName}" not a member of ${this.name}.`);
+    }
+    return new PartialGame({ ...this.state, systems: result.systems });
+  }
 }
 
 export interface GameReference extends ReferenceKind {
@@ -577,9 +590,16 @@ export interface PartialSystemState {
   name: string;
 
   /**
-   * Whether this is @member owner's home system.
+   * Which turn number this system was last viewed/scouted/updated.
    */
-  home: boolean;
+  lastSeenOnTurn: number;
+
+  /**
+   * Whether this is @member owner's home system.
+   *
+   * If undefined it is not known.
+   */
+  home?: boolean;
 
   /**
    * Owning player, or "'Empire'" if not controlled by a player.
@@ -622,9 +642,18 @@ export class PartialSystem extends Entity<PartialSystemState, PartialSystem> {
   }
 
   /**
-   * Whether this is @member owner's home system.
+   * Which turn number this system was last viewed/scouted/updated.
    */
-  get home(): boolean {
+  get lastSeenOnTurn(): number {
+    return this.state.lastSeenOnTurn;
+  }
+
+  /**
+   * Whether this is @member owner's home system.
+   *
+   * If undefined it is not known.
+   */
+  get home(): boolean | undefined {
     return this.state.home;
   }
 
@@ -677,10 +706,11 @@ export class PartialFleet extends Entity<Partial<FleetState>, PartialFleet> {
   }
 }
 
-export class PartialPlanet extends Entity<
-  Partial<PlanetState> & { guid: string },
-  PartialPlanet
-> {
+export type PartialPlanetState = Omit<Partial<PlanetState>, 'guid'> & {
+  guid: string;
+};
+
+export class PartialPlanet extends Entity<PartialPlanetState, PartialPlanet> {
   /**
    * Unique ID.
    */
@@ -717,7 +747,7 @@ export class PartialPlanet extends Entity<
   }
 }
 
-export type PartialGameState = GameState & {
+export type PartialGameState = Partial<Omit<GameState, 'systems'>> & {
   kind: 'Game';
   systems: PartialSystemState[];
 };

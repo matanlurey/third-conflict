@@ -19,7 +19,7 @@ export abstract class GameClient {
    */
   abstract gamesFetch(
     name: string,
-  ): Promise<PartialGame | GameListing | undefined>;
+  ): Promise<PartialGame | Lobby | GameListing | undefined>;
 
   /**
    * Lists active games.

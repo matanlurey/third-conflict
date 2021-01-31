@@ -2,75 +2,7 @@ import Prando from 'prando';
 import { v4 } from 'uuid';
 import { PoissonMapGenerator } from './map-generator';
 import { PoissonDiskSampler } from './poisson-disk';
-import {
-  FleetState,
-  GameState,
-  PartialGameState,
-  PartialSystemState,
-  PlanetState,
-  PlayerState,
-  SystemState,
-} from './state';
 import { deepClone } from './utils';
-
-export class FogOfWar {
-  createInitialFogOfWar(
-    state: GameState,
-    serverAgent: boolean,
-    playerId: string,
-  ): PartialGameState {
-    let player!: PlayerState;
-    for (const p of state.players) {
-      if (p.name === playerId) {
-        player = p;
-        break;
-      }
-    }
-    return {
-      kind: 'Game',
-      currentTurn: state.currentTurn,
-      name: state.name,
-      players: state.players.length,
-      endedTurn: serverAgent,
-      fleets: [],
-      systems: state.systems.map((system) => {
-        return this.revealSystem(system, player);
-      }),
-    };
-  }
-
-  // TODO: Add an option to reveal a non-friendly system.
-  revealSystem(input: SystemState, player: PlayerState): PartialSystemState {
-    const status = this.determineStatus(input, player.name);
-    let fleet: Partial<FleetState> = {};
-    let factories: number | undefined;
-    let planets: Partial<PlanetState>[];
-    if (status === 'Self') {
-      fleet = input.orbit;
-      factories = input.factories;
-      planets = input.planets;
-    } else {
-      planets = [];
-    }
-    return {
-      name: input.name,
-      position: input.position,
-      status,
-      orbit: fleet,
-      factories,
-      planets,
-    };
-  }
-
-  private determineStatus(system: SystemData, player: string): HudIndicatorTag {
-    if (system.owner === 'Empire') {
-      return;
-    }
-    if (system.owner.player === player) {
-      return 'Self';
-    }
-  }
-}
 
 export class RandomSpawner {
   private randomEmpireFactories(
