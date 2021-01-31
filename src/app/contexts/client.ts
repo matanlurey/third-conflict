@@ -1,12 +1,8 @@
 import React from 'react';
 import { GameClient } from '../../common/game-client';
 import { GameServer } from '../../common/game-server';
-import {
-  FogOfWarGameData,
-  GameListData,
-  GameLobbyData,
-  GameStateData,
-} from '../../common/game-state';
+import { GameLobbyData, GameStateData } from '../../common/game-state';
+import { GameListing, Lobby, PartialGame } from '../../common/state';
 
 export class LocalGameServer extends GameServer {
   constructor(private readonly storage = localStorage) {
@@ -51,11 +47,11 @@ export class LocalGameClient extends GameClient {
 
   async gamesFetch(
     name: string,
-  ): Promise<GameLobbyData | GameListData | FogOfWarGameData | undefined> {
+  ): Promise<PartialGame | GameListing | undefined> {
     return this.server.onGamesFetch(this.player, name);
   }
 
-  async gamesList(): Promise<GameListData[]> {
+  async gamesList(): Promise<GameListing[]> {
     return this.server.onGamesList();
   }
 
@@ -63,7 +59,7 @@ export class LocalGameClient extends GameClient {
     return this.server.onGamesDelete(this.player, { name });
   }
 
-  async gamesCreate(name: string, players: number): Promise<GameLobbyData> {
+  async gamesCreate(name: string, players: number): Promise<Lobby> {
     return this.server.onGamesCreate(this.player, { name, players });
   }
 
@@ -71,7 +67,7 @@ export class LocalGameClient extends GameClient {
     name: string,
     seed: string,
     systems: number,
-  ): Promise<FogOfWarGameData> {
+  ): Promise<PartialGame> {
     return this.server.onGamesStart(this.player, { name, seed, systems });
   }
 

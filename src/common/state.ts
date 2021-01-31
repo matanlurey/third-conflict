@@ -80,6 +80,11 @@ export interface LobbyState {
   name: string;
 
   /**
+   * Tagged type of listing.
+   */
+  kind: 'Lobby';
+
+  /**
    * Used to procedurally generate the map and empire.
    */
   seed: string;
@@ -142,11 +147,20 @@ export interface LobbyReference extends ReferenceKind {
   name: string;
 }
 
+export interface FogOfWarState {
+  systems: PartialSystemState[];
+}
+
 export interface GameState {
   /**
    * Name of the game.
    */
   name: string;
+
+  /**
+   * Tagged type of listing.
+   */
+  kind: 'Game';
 
   /**
    * Which player created the game.
@@ -177,6 +191,13 @@ export interface GameState {
    * Systems in the game.
    */
   systems: SystemState[];
+
+  /**
+   * Cached fog of war view of the world keyed by player name.
+   */
+  fogOfWar: {
+    [key: string]: FogOfWarState | undefined;
+  };
 }
 
 export class Game extends Entity<GameState, Game> {
@@ -593,5 +614,161 @@ export class PartialSystem extends Entity<PartialSystemState, PartialSystem> {
     return new Point(this.state.position);
   }
 
-  // FIXME: Complete the rest of the getters.
+  /**
+   * Name of the system.
+   */
+  get name(): string {
+    return this.state.name;
+  }
+
+  /**
+   * Whether this is @member owner's home system.
+   */
+  get home(): boolean {
+    return this.state.home;
+  }
+
+  /**
+   * Owning player, or "'Empire'" if not controlled by a player.
+   *
+   * If undefined it is not known.
+   */
+  get owner(): PlayerReference | 'Empire' | undefined {
+    return this.state.owner;
+  }
+
+  /**
+   * Orbiting fleet controlled by @member owner.
+   */
+  get orbit(): PartialFleet {
+    return new PartialFleet(this.state.orbit);
+  }
+
+  /**
+   * Number of factories present in the system.
+   *
+   * If undefined it is not known.
+   */
+  get factories(): number | undefined {
+    return this.state.factories;
+  }
+}
+
+export class PartialFleet extends Entity<Partial<FleetState>, PartialFleet> {
+  /**
+   * WarShips that are part of this fleet.
+   */
+  get warships(): number | undefined {
+    return this.state.warships;
+  }
+
+  /**
+   * Transports that are part of this fleet.
+   */
+  get transports(): number | undefined {
+    return this.state.transports;
+  }
+
+  /**
+   * Troops that are on board @member transports.
+   */
+  get troops(): number | undefined {
+    return this.state.troops;
+  }
+}
+
+export class PartialPlanet extends Entity<
+  Partial<PlanetState> & { guid: string },
+  PartialPlanet
+> {
+  /**
+   * Unique ID.
+   */
+  get guid(): string {
+    return this.state.guid;
+  }
+
+  /**
+   * Troops garrisoned on the planet.
+   */
+  get troops(): number | undefined {
+    return this.state.troops;
+  }
+
+  /**
+   * Number of troops recruited per turn.
+   */
+  get recruit(): number | undefined {
+    return this.state.recruit;
+  }
+
+  /**
+   * Morale of the planet.
+   */
+  get morale(): number | undefined {
+    return this.state.morale;
+  }
+
+  /**
+   * Owner of the planet.
+   */
+  get owner(): PlayerReference | 'Empire' | undefined {
+    return this.state.owner;
+  }
+}
+
+export type PartialGameState = GameState & {
+  kind: 'Game';
+  systems: PartialSystemState[];
+};
+
+export class PartialGame extends Entity<PartialGameState, PartialGame> {
+  /**
+   * Name of the game.
+   */
+  get name(): string {
+    return this.state.name;
+  }
+
+  /**
+   * Which player created the game.
+   */
+  get createdBy(): PlayerReference {
+    return this.state.createdBy;
+  }
+
+  /**
+   * When the lobby was last updated.
+   */
+  get lastUpdated(): number {
+    return this.state.lastUpdated;
+  }
+
+  /**
+   * Current turn number.
+   */
+  get currentTurn(): number {
+    return this.state.currentTurn;
+  }
+
+  /**
+   * Configured settings.
+   */
+  get settings(): Settings {
+    return new Settings(this.state.settings);
+  }
+
+  /**
+   * Players in the game.
+   */
+  get players(): Player[] {
+    return this.state.players.map((p) => new Player(p));
+  }
+
+  /**
+   * Systems in the game.
+   */
+  get systems(): PartialSystem[] {
+    return this.state.systems.map((s) => new PartialSystem(s));
+  }
 }

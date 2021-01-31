@@ -1,41 +1,27 @@
 import Prando from 'prando';
 import { v4 } from 'uuid';
-import {
-  FleetData,
-  FogOfWarGameData,
-  FogOfWarSystemData,
-  GameSettingsData,
-  GameStateData,
-  HudIndicatorTag,
-  OwnerData,
-  PlanetData,
-  PlayerStateData,
-  SystemData,
-} from './game-state';
 import { PoissonMapGenerator } from './map-generator';
 import { PoissonDiskSampler } from './poisson-disk';
+import {
+  FleetState,
+  GameState,
+  PartialGameState,
+  PartialSystemState,
+  PlanetState,
+  PlayerState,
+  SystemState,
+} from './state';
 import { deepClone } from './utils';
-
-export function viewGameStateAs(
-  state: GameStateData,
-  perspective: string,
-): FogOfWarGameData | undefined {
-  for (const player of state.players) {
-    if (player.userId === perspective) {
-      return player.fogOfWar;
-    }
-  }
-}
 
 export class FogOfWar {
   createInitialFogOfWar(
-    state: GameStateData,
+    state: GameState,
     serverAgent: boolean,
     playerId: string,
-  ): FogOfWarGameData {
-    let player!: PlayerStateData;
+  ): PartialGameState {
+    let player!: PlayerState;
     for (const p of state.players) {
-      if (p.userId === playerId) {
+      if (p.name === playerId) {
         player = p;
         break;
       }
@@ -54,15 +40,17 @@ export class FogOfWar {
   }
 
   // TODO: Add an option to reveal a non-friendly system.
-  revealSystem(input: SystemData, player: PlayerStateData): FogOfWarSystemData {
-    const status = this.determineStatus(input, player.userId);
-    let fleet: Partial<FleetData> = {};
+  revealSystem(input: SystemState, player: PlayerState): PartialSystemState {
+    const status = this.determineStatus(input, player.name);
+    let fleet: Partial<FleetState> = {};
     let factories: number | undefined;
-    let planets: PlanetData[] | undefined;
+    let planets: Partial<PlanetState>[];
     if (status === 'Self') {
       fleet = input.orbit;
       factories = input.factories;
       planets = input.planets;
+    } else {
+      planets = [];
     }
     return {
       name: input.name,

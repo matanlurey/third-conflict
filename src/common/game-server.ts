@@ -6,13 +6,13 @@ import {
   viewGameStateAs,
 } from './game-logic';
 import {
-  FogOfWarGameData,
-  GameListData,
-  GameLobbyData,
-  GameSettingsData,
-  GameStateData,
-  PlayerStateData,
-} from './game-state';
+  GameListingState,
+  GameState,
+  LobbyState,
+  PartialGameState,
+  PlayerState,
+  SettingsState,
+} from './state';
 import { deepClone } from './utils';
 
 /**
@@ -25,14 +25,14 @@ export class GameServer {
 
   constructor(
     protected readonly games: {
-      [key: string]: GameLobbyData | GameStateData;
+      [key: string]: LobbyState | GameState;
     },
     protected readonly prando = new Prando(),
   ) {}
 
   protected async readState(
     name: string,
-  ): Promise<GameLobbyData | GameStateData | undefined> {
+  ): Promise<LobbyState | GameState | undefined> {
     const result = this.games[name];
     return result ? deepClone(result) : undefined;
   }
@@ -40,7 +40,7 @@ export class GameServer {
   /**
    * Implementations of @see GameServer that persist data should override.
    */
-  protected async writeState<T extends GameLobbyData | GameStateData>(
+  protected async writeState<T extends LobbyState | GameState>(
     name: string,
     data: T,
   ): Promise<T> {
@@ -68,12 +68,12 @@ export class GameServer {
   protected async writePlayer(
     game: string,
     player: string,
-    map: (data: PlayerStateData) => PlayerStateData,
-  ): Promise<GameStateData | undefined> {
+    map: (data: PlayerState) => PlayerState,
+  ): Promise<GameState | undefined> {
     const state = await this.readState(game);
     if (state && state.kind === 'Game') {
       for (let i = 0; i < state.players.length; i++) {
-        if (state.players[i].userId === player) {
+        if (state.players[i].name === player) {
           state.players[i] = map(state.players[i]);
         }
       }
@@ -98,13 +98,14 @@ export class GameServer {
   async onGamesFetch(
     player: string,
     name: string,
-  ): Promise<GameLobbyData | GameListData | FogOfWarGameData | undefined> {
+  ): Promise<PartialGameState | LobbyState | undefined> {
     for (const game of Object.values(this.games)) {
       if (game.name === name) {
         if (game.kind === 'Lobby') {
           return game;
         } else {
-          return viewGameStateAs(game, player);
+          // return viewGameStateAs(game, player);
+          throw new Error('Unimplemented');
         }
       }
     }
@@ -113,16 +114,13 @@ export class GameServer {
   /**
    * Processes a game list request.
    */
-  async onGamesList(): Promise<GameListData[]> {
+  async onGamesList(): Promise<GameListingState[]> {
     return Object.values(this.games).map((value) => {
       return {
-        name: value.name,
-        kind: value.kind,
+        reference: { kind: value.kind, name: value.name },
         lastUpdated: value.lastUpdated,
         players:
-          typeof value.players === 'number'
-            ? value.players
-            : value.players.length,
+          value.kind === 'Lobby' ? value.maxPlayers : value.players.length,
       };
     });
   }
@@ -136,11 +134,12 @@ export class GameServer {
       name: string;
       players: number;
     },
-  ): Promise<GameLobbyData> {
+  ): Promise<LobbyState> {
     return this.writeState(request.name, {
-      ...request,
+      name: request.name,
+      maxPlayers: request.players,
       seed: this.prando.nextString(10),
-      createdBy: player,
+      createdBy: { kind: 'Player', name: player },
       kind: 'Lobby',
       lastUpdated: this.currentTime(),
     });
@@ -176,31 +175,27 @@ export class GameServer {
       seed: string;
       systems: number;
     },
-  ): Promise<FogOfWarGameData> {
+  ): Promise<PartialGameState> {
     // TODO: Enforce player created the game being started.
     // TODO: Enforce the game exists and hasn't already been started.
     // TODO: Enforce the player is in the game that is starting.
     // TODO: Enforce systems are valid.
-    const pending = (await this.readState(request.name)) as GameLobbyData;
+    const pending = (await this.readState(request.name)) as LobbyState;
     // TODO: Support multiplayer.
-    const players: PlayerStateData[] = [
+    const players: PlayerState[] = [
       {
         name: 'Human',
-        userId: 'Guest',
-        fogOfWar: {} as FogOfWarGameData,
-        serverAgent: false,
+        agent: false,
       },
-      ...new Array(pending.players - 1).fill(null).map((_, i) => {
+      ...new Array(pending.maxPlayers - 1).fill(null).map((_, i) => {
         return {
           name: `AI ${i + 1}`,
-          userId: `ai-${i + 1}`,
-          fogOfWar: {} as FogOfWarGameData,
-          serverAgent: true,
+          agent: true,
         };
       }),
     ];
     // TODO: Allow customization of these settings.
-    const settings: GameSettingsData = {
+    const settings: SettingsState = {
       initialFactories: 10,
       shipSpeedATurn: 4,
     };
@@ -211,10 +206,10 @@ export class GameServer {
       settings,
       players,
     );
-    const initialState: GameStateData = {
+    const initialState: GameState = {
       name: pending.name,
       lastUpdated: this.currentTime(),
-      createdBy: player,
+      createdBy: { kind: 'Player', name: player },
       currentTurn: 1,
       kind: 'Game',
       players,
@@ -222,15 +217,15 @@ export class GameServer {
       systems,
       settings,
     };
-    const stateWithFogOfWar: GameStateData = {
+    const stateWithFogOfWar: GameState = {
       ...initialState,
       players: initialState.players.map((player) => {
         return {
           ...player,
           fogOfWar: this.fogOfWar.createInitialFogOfWar(
             initialState,
-            player.serverAgent,
-            player.userId,
+            player.agent,
+            player.name,
           ),
         };
       }),

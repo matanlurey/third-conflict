@@ -1,4 +1,4 @@
-import { FogOfWarGameData, GameListData, GameLobbyData } from './game-state';
+import { GameListing, Lobby, PartialGame } from './state';
 
 /**
  * Represents a connection to a game server.
@@ -19,12 +19,12 @@ export abstract class GameClient {
    */
   abstract gamesFetch(
     name: string,
-  ): Promise<FogOfWarGameData | GameListData | undefined>;
+  ): Promise<PartialGame | GameListing | undefined>;
 
   /**
    * Lists active games.
    */
-  abstract gamesList(): Promise<GameListData[]>;
+  abstract gamesList(): Promise<GameListing[]>;
 
   /**
    * Deletes a game.
@@ -34,7 +34,7 @@ export abstract class GameClient {
   /**
    * Creates a game (lobby).
    */
-  abstract gamesCreate(name: string, players: number): Promise<GameLobbyData>;
+  abstract gamesCreate(name: string, players: number): Promise<Lobby>;
 
   /**
    * Starts a game.
@@ -43,7 +43,7 @@ export abstract class GameClient {
     name: string,
     seed: string,
     systems: number,
-  ): Promise<FogOfWarGameData>;
+  ): Promise<PartialGame>;
 
   /**
    * Ends your turn.
