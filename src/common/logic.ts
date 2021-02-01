@@ -7,6 +7,7 @@ import {
   PlayerReference,
   Settings,
   System,
+  SystemState,
 } from './state';
 
 /**
@@ -73,9 +74,11 @@ export class FogOfWar {
 
 export class Spawner {
   spawnInitialSystems(
-    prando: Prando,
-    systems: number,
-    settings: Settings,
-    players: PlayerReference[],
-  ): SystemState[] {}
+    _prando: Prando,
+    _systems: number,
+    _settings: Settings,
+    _players: PlayerReference[],
+  ): SystemState[] {
+    throw new Error('Unimplemented');
+  }
 }
